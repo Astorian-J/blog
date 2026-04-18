@@ -138,7 +138,7 @@
         .post-list { display: flex; flex-direction: column; gap: 16px; }
         .post-card {
             background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px;
-            padding: 22px 26px; transition: all 0.25s ease; cursor: default;
+            padding: 22px 26px; transition: all 0.25s ease; cursor: pointer;
         }
         .post-card:hover { border-color: #ccc; box-shadow: 0 4px 20px rgba(0,0,0,0.06); transform: translateY(-2px); }
         .post-meta { display: flex; align-items: center; gap: 10px; margin-bottom: 7px; font-size: 12.5px; }
@@ -259,6 +259,48 @@
         }
         .admin-link:hover { opacity: 1; border-color: var(--accent); color: var(--accent); }
 
+        /* ===== 文章详情弹窗 ===== */
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 2000;
+            align-items: center; justify-content: center;
+            padding: 20px; box-sizing: border-box;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-box {
+            background: var(--card-bg); border-radius: 12px;
+            max-width: 680px; width: 100%; max-height: 80vh;
+            overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            padding: 32px 36px; position: relative;
+        }
+        .modal-close {
+            position: absolute; top: 16px; right: 18px;
+            background: none; border: none; font-size: 24px;
+            cursor: pointer; color: var(--text-muted); line-height: 1;
+            transition: color 0.2s; padding: 4px;
+        }
+        .modal-close:hover { color: #e74c3c; }
+        .modal-title { font-size: 22px; font-weight: 700; margin-bottom: 8px; line-height: 1.4; }
+        .modal-meta { font-size: 13px; color: var(--text-muted); margin-bottom: 18px; }
+        .modal-body { font-size: 14.5px; line-height: 1.85; color: var(--text-secondary); }
+        .modal-body h1,.modal-body h2,.modal-body h3 { margin-top: 20px; margin-bottom: 8px; font-weight: 600; color: var(--text-primary); }
+        .modal-body h2 { font-size: 18px; }
+        .modal-body h3 { font-size: 15.5px; }
+        .modal-body p { margin-bottom: 12px; }
+        .modal-body ul,.modal-body ol { margin-bottom: 12px; padding-left: 22px; }
+        .modal-body li { margin-bottom: 4px; }
+        .modal-body code {
+            background: #f1f3f5; padding: 1px 6px; border-radius: 4px; font-size: 13px;
+        }
+        .modal-body blockquote {
+            border-left: 3px solid var(--accent);
+            padding: 8px 16px; margin: 12px 0;
+            background: rgba(59,130,246,0.04); color: var(--text-muted);
+        }
+        .modal-body img { max-width: 100%; border-radius: 8px; margin: 10px 0; }
+        .modal-body strong { color: var(--text-primary); }
+
         /* ===== 响应式 ===== */
         @media (max-width: 640px) {
             .navbar { padding: 0 20px; }
@@ -377,6 +419,16 @@
                 <!-- JS动态渲染 -->
             </div>
         </section>
+
+    <!-- 文章详情弹窗 -->
+    <div class="modal-overlay" id="articleModal" onclick="if(event.target===this)closeModal()">
+        <div class="modal-box">
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+            <h2 class="modal-title" id="modalTitle"></h2>
+            <div class="modal-meta" id="modalMeta"></div>
+            <div class="modal-body" id="modalBody"></div>
+        </div>
+    </div>
 
     </main>
 
@@ -558,7 +610,7 @@
                     const { frontmatter: fm, body } = parseFrontmatter(text);
                     const tagMap = { 公告: i18n[currentLang].tag_announce, 教程: i18n[currentLang].tag_guide, 分析: i18n[currentLang].tag_analysis };
                     html += `
-                        <article class="post-card">
+                        <article class="post-card" onclick="openArticleModal('${f}')">
                             <div class="post-meta">
                                 <span class="tag${fm.tag === '公告' ? ' highlight' : ''}">${tagMap[fm.tag] || fm.tag || ''}</span>
                                 <span class="post-date">${fm.date || ''}</span>
@@ -654,6 +706,55 @@
             }
             if (html) container.innerHTML = html;
         }
+
+        // ===== 文章详情弹窗 =====
+        const articleCache = {};
+
+        function renderMd(md) {
+            if (!md) return '';
+            let html = md
+                .replace(/^### (.*$)/gm, '<h3>$1</h3>')
+                .replace(/^## (.*$)/gm, '<h2>$1</h2>')
+                .replace(/^# (.*$)/gm, '<h1>$1</h1>')
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/`(.*?)`/g, '<code>$1</code>')
+                .replace(/^> (.*$)/gm, '<blockquote>$1</blockquote>')
+                .replace(/^\- (.*$)/gm, '<li>$1</li>')
+                .replace(/(<li>.*<\/li>\n?)+/g, '<ul>$&</ul>')
+                .replace(/!\[(.*?)\]\((.*?)\)/g, '<img src="$2" alt="$1">')
+                .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank">$1</a>')
+                .replace(/\n\n/g, '</p><p>')
+                .replace(/\n/g, '<br>');
+            return '<p>' + html + '</p>';
+        }
+
+        async function openArticleModal(file) {
+            try {
+                let data = articleCache[file];
+                if (!data) {
+                    const res = await fetch(file);
+                    if (!res.ok) return;
+                    const text = await res.text();
+                    data = parseFrontmatter(text);
+                    articleCache[file] = data;
+                }
+                document.getElementById('modalTitle').textContent = data.frontmatter.title || '';
+                const tagMap = { 公告: '公告', 教程: '教程', 分析: '分析' };
+                document.getElementById('modalMeta').innerHTML =
+                    `<span class="tag${data.frontmatter.tag === '公告' ? ' highlight' : ''}">${tagMap[data.frontmatter.tag] || data.frontmatter.tag || ''}</span>` +
+                    ` &nbsp; ${data.frontmatter.date || ''}`;
+                document.getElementById('modalBody').innerHTML = renderMd(data.body);
+                document.getElementById('articleModal').classList.add('active');
+                document.body.style.overflow = 'hidden';
+            } catch(e) { console.warn('Failed to open article:', e); }
+        }
+
+        function closeModal() {
+            document.getElementById('articleModal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
         // ===== 启动 =====
         document.addEventListener('DOMContentLoaded', () => {
