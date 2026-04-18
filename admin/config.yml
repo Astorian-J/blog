@@ -1,9 +1,7 @@
 backend:
-  name: github
-  repo: Astorian-J/blog
+  name: git-gateway
   branch: main
-  base_url: https://github.com
-  auth_endpoint: auth
+  identity_url: https://your-site.netlify.app/.netlify/identity
 
 media_folder: "assets/images"
 public_folder: "/assets/images"
