@@ -5,12 +5,20 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# 防止同一 workflow 多次并发运行
+concurrency:
+  group: auto-manifest
+  cancel-in-progress: true
+
 permissions:
   contents: write
 
 jobs:
   update-manifest:
     runs-on: ubuntu-latest
+    # 跳过由本 workflow 自身触发的提交（[skip ci] 不够可靠）
+    if: |
+      !contains(github.event.head_commit.message, 'auto: update manifest')
     steps:
       - uses: actions/checkout@v4
         with:
