@@ -4,6 +4,8 @@ backend:
   branch: main
   base_url: https://github.com
   auth_endpoint: login/oauth/authorize
+  client_id: Ov23li2zOSnvK3cxhJKp
+  auth_type: implicit
 
 media_folder: "assets/images"
 public_folder: "/assets/images"
