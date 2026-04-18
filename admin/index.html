@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>内容管理 - 中国社区昆特平衡数据库</title>
+    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+</head>
+<body>
+    <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+    <script>
+        // GitHub OAuth 配置
+        if (window.NetlifyCMS) {
+            window.NetlifyCMS.registerBackend('github', class {
+                constructor(config) {
+                    this.config = config;
+                    // 你的 GitHub OAuth App 凭据
+                    this.client_id = 'Ov23li9h0FvUsgXkCaYK';
+                    this.client_secret = '7bf5940cbe760571314f7500412ab6ffc2468b09';
+                }
+            });
+        }
+    </script>
+</body>
+</html>

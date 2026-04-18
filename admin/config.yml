@@ -1,0 +1,99 @@
+backend:
+  name: github
+  repo: Astorian-J/blog
+  branch: main
+  base_url: https://github.com
+  auth_endpoint: auth
+
+media_folder: "assets/images"
+public_folder: "/assets/images"
+
+locale: zh_Hans
+
+collections:
+  # ========== 最新平衡资讯 ==========
+  - name: news
+    label: "📰 最新平衡资讯"
+    label_singular: "资讯"
+    folder: content/news
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    fields:
+      - { label: "标题", name: title, widget: string }
+      - { label: "日期", name: date, widget: datetime, date_format: "YYYY-MM-DD", time_format: false }
+      - { label: "是否热门", name: hot, widget: boolean, default: false }
+      - { label: "内容摘要", name: excerpt, widget: text }
+      - { label: "详细内容 (可选)", name: body, widget: markdown, required: false }
+
+  # ========== 文章发布 ==========
+  - name: articles
+    label: "📝 文章发布"
+    label_singular: "文章"
+    folder: content/articles
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    fields:
+      - { label: "标题", name: title, widget: string }
+      - { label: "日期", name: date, widget: datetime, date_format: "YYYY-MM-DD", time_format: false }
+      - {
+          label: "分类标签",
+          name: tag,
+          widget: select,
+          options: [公告, 教程, 分析, 杂谈],
+          default: 公告
+        }
+      - { label: "封面图片 (可选)", name: cover, widget: image, required: false }
+      - { label: "文章摘要", name: excerpt, widget: text }
+      - { label: "正文内容", name: body, widget: markdown }
+
+  # ========== 每月问卷数据 ==========
+  - name: survey-data
+    label: "📊 每月问卷数据"
+    label_singular: "问卷数据"
+    folder: content/survey-data
+    create: true
+    slug: "{{year}}-{{month}}"
+    fields:
+      - { label: "月份标题", name: title, widget: string, hint: "如：2026年4月问卷数据" }
+      - { label: "年份", name: year, widget: number }
+      - { label: "月份", name: month, widget: number }
+      - { label: "数据图表截图", name: chart_image, widget: image, required: false }
+      - { label: "卡牌种类数", name: card_count, widget: number }
+      - { label: "投票人次", name: vote_count, widget: number }
+      - { label: "表格下载链接", name: download_url, widget: string, required: false, hint: "填 Excel 文件链接或 GitHub 原始文件路径" }
+      - { label: "备注说明", name: description, widget: text, required: false }
+
+  # ========== 每月平衡推荐视频 ==========
+  - name: videos
+    label: "▶️ 每月平衡推荐视频"
+    label_singular: "视频"
+    folder: content/videos
+    create: true
+    slug: "{{year}}-{{month}}"
+    fields:
+      - { label: "视频标题", name: title, widget: string, hint: "如：2026年4月平衡推荐 — 春季赛版本解读" }
+      - { label: "发布日期", name: date, widget: datetime, date_format: "YYYY-MM-DD", time_format: false }
+      - {
+          label: "来源平台",
+          name: source,
+          widget: select,
+          options: [哔哩哔哩, YouTube, 其他],
+          default: 哔哩哔哩
+        }
+      - { label: "视频链接", name: url, widget: string, hint: "B站 BV号 或 完整URL" }
+      - { label: "封面图 (可选)", name: thumbnail, widget: image, required: false }
+
+  # ========== 历次平衡改动 ==========
+  - name: history
+    label: "📋 历次平衡改动"
+    label_singular: "补丁记录"
+    folder: content/history
+    create: true
+    slug: "{{year}}-{{month}}"
+    fields:
+      - { label: "补丁名称", name: title, widget: string, hint: "如：2026.04 补丁" }
+      - { label: "发布日期", name: date, widget: datetime, date_format: "YYYY-MM-DD", time_format: false }
+      - { label: "加强数量", name: buffed, widget: number }
+      - { label: "削弱数量", name: nerfed, widget: number }
+      - { label: "改动详情截图/图表", name: image, widget: image, required: false }
+      - { label: "备注说明 (可选)", name: notes, widget: markdown, required: false }
