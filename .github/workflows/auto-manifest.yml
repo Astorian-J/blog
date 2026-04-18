@@ -1,0 +1,62 @@
+name: Auto Update Content Manifest
+
+on:
+  push:
+    paths:
+      - 'content/**/*.md'
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  update-manifest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate manifest.json
+        run: |
+          echo '{' > content/manifest.json
+          echo '  "news": [' >> content/manifest.json
+          for f in $(find content/news -name '*.md' | sort -r | head -20); do echo "    \"${f}\"," >> content/manifest.json; done
+          echo '  ],' >> content/manifest.json
+          echo '  "articles": [' >> content/manifest.json
+          for f in $(find content/articles -name '*.md' | sort -r | head -20); do echo "    \"${f}\"," >> content/manifest.json; done
+          echo '  ],' >> content/manifest.json
+          echo '  "survey-data": [' >> content/manifest.json
+          for f in $(find content/survey-data -name '*.md' | sort -r | head -12); do echo "    \"${f}\"," >> content/manifest.json; done
+          echo '  ],' >> content/manifest.json
+          echo '  "videos": [' >> content/manifest.json
+          for f in $(find content/videos -name '*.md' | sort -r | head -12); do echo "    \"${f}\"," >> content/manifest.json; done
+          echo '  ],' >> content/manifest.json
+          echo '  "history": [' >> content/manifest.json
+          for f in $(find content/history -name '*.md' | sort -r | head -24); do echo "    \"${f}\"," >> content/manifest.json; done
+          echo '  ]' >> content/manifest.json
+          echo '}' >> content/manifest.json
+          # Fix trailing commas (simple approach)
+          python3 -c "
+import re, json
+with open('content/manifest.json','r') as f: txt=f.read()
+txt=re.sub(r',\s*(\]|\})', r'\1', txt)
+json.loads(txt)
+with open('content/manifest.json','w') as f: f.write(txt)
+print('manifest.json generated OK')
+"
+
+      - name: Check for changes
+        id: check_changes
+        run: |
+          git diff --exit-code content/manifest.json || echo "changed=true" >> $GITHUB_OUTPUT
+          echo "changed=false" >> $GITHUB_OUTPUT
+
+      - name: Commit and push updated manifest
+        if: steps.check_changes.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add content/manifest.json
+          git commit -m "auto: update manifest.json [skip ci]"
+          git push
