@@ -507,164 +507,152 @@
         const CONTENT_BASE = '';
 
         /** 渲染所有板块 */
+        let contentManifest = { news: [], articles: [], 'survey-data': [], videos: [], history: [] };
+
+        async function loadManifest() {
+            try {
+                const res = await fetch('content/manifest.json');
+                if (res.ok) contentManifest = await res.json();
+            } catch(e) { console.warn('Failed to load manifest:', e); }
+        }
+
         async function renderAllContent() {
+            await loadManifest();
             await Promise.all([renderNews(), renderArticles(), renderSurveyData(), renderVideos(), renderHistory()]);
         }
 
         // ========== 最新资讯 ==========
         async function renderNews() {
             const container = document.getElementById('newsGrid');
-            try {
-                const files = [
-                    'content/news/2026-04-18-voting-open.md',
-                    'content/news/2026-04-15-patch-preview.md',
-                    'content/news/2026-04-10-survey-updated.md',
-                    'content/news/2026-04-02-spring-season.md'
-                ];
-                let html = '';
-                for (const f of files) {
-                    try {
-                        const res = await fetch(f);
-                        if (!res.ok) continue;
-                        const text = await res.text();
-                        const { frontmatter: fm } = parseFrontmatter(text);
-                        html += `
-                            <div class="news-card">
-                                <div class="news-card-header">
-                                    ${fm.hot ? `<span class="news-tag">${i18n[currentLang].tag_hot}</span>` : ''}
-                                    <span class="news-date">${fm.date || ''}</span>
-                                </div>
-                                <p class="news-text">${fm.excerpt || fm.title || ''}</p>
-                            </div>`;
-                    } catch(e) { /* skip */ }
-                }
-                if (html) container.innerHTML = html;
-            } catch(e) { console.warn('Failed to load news:', e); }
+            const files = contentManifest.news || [];
+            let html = '';
+            for (const f of files) {
+                try {
+                    const res = await fetch(f);
+                    if (!res.ok) continue;
+                    const text = await res.text();
+                    const { frontmatter: fm } = parseFrontmatter(text);
+                    html += `
+                        <div class="news-card">
+                            <div class="news-card-header">
+                                ${fm.hot ? `<span class="news-tag">${i18n[currentLang].tag_hot}</span>` : ''}
+                                <span class="news-date">${fm.date || ''}</span>
+                            </div>
+                            <p class="news-text">${fm.excerpt || fm.title || ''}</p>
+                        </div>`;
+                } catch(e) { /* skip */ }
+            }
+            if (html) container.innerHTML = html;
         }
 
         // ========== 文章发布 ==========
         async function renderArticles() {
             const container = document.getElementById('articleList');
-            try {
-                const files = [
-                    'content/articles/2026-04-18-launch-announcement.md',
-                    'content/articles/2026-04-15-voting-guide.md',
-                    'content/articles/2026-04-01-patch-analysis.md'
-                ];
-                let html = '';
-                for (const f of files) {
-                    try {
-                        const res = await fetch(f);
-                        if (!res.ok) continue;
-                        const text = await res.text();
-                        const { frontmatter: fm, body } = parseFrontmatter(text);
-                        const tagMap = { 公告: i18n[currentLang].tag_announce, 教程: i18n[currentLang].tag_guide, 分析: i18n[currentLang].tag_analysis };
-                        html += `
-                            <article class="post-card">
-                                <div class="post-meta">
-                                    <span class="tag${fm.tag === '公告' ? ' highlight' : ''}">${tagMap[fm.tag] || fm.tag || ''}</span>
-                                    <span class="post-date">${fm.date || ''}</span>
-                                </div>
-                                <h3 class="post-title">${fm.title || ''}</h3>
-                                <p class="post-excerpt">${fm.excerpt || ''}</p>
-                            </article>`;
-                    } catch(e) { /* skip */ }
-                }
-                if (html) container.innerHTML = html;
-            } catch(e) { console.warn('Failed to load articles:', e); }
+            const files = contentManifest.articles || [];
+            let html = '';
+            for (const f of files) {
+                try {
+                    const res = await fetch(f);
+                    if (!res.ok) continue;
+                    const text = await res.text();
+                    const { frontmatter: fm, body } = parseFrontmatter(text);
+                    const tagMap = { 公告: i18n[currentLang].tag_announce, 教程: i18n[currentLang].tag_guide, 分析: i18n[currentLang].tag_analysis };
+                    html += `
+                        <article class="post-card">
+                            <div class="post-meta">
+                                <span class="tag${fm.tag === '公告' ? ' highlight' : ''}">${tagMap[fm.tag] || fm.tag || ''}</span>
+                                <span class="post-date">${fm.date || ''}</span>
+                            </div>
+                            <h3 class="post-title">${fm.title || ''}</h3>
+                            <p class="post-excerpt">${fm.excerpt || ''}</p>
+                        </article>`;
+                } catch(e) { /* skip */ }
+            }
+            if (html) container.innerHTML = html;
         }
 
         // ========== 问卷数据 ==========
         async function renderSurveyData() {
             const container = document.getElementById('dataGrid');
-            try {
-                const files = ['content/survey-data/2026-04.md', 'content/survey-data/2026-03.md', 'content/survey-data/2026-02.md'];
-                let html = '';
-                for (const f of files) {
-                    try {
-                        const res = await fetch(f);
-                        if (!res.ok) continue;
-                        const text = await res.text();
-                        const { frontmatter: fm } = parseFrontmatter(text);
-                        const imgHtml = fm.chart_image
-                            ? `<img src="${fm.chart_image}" alt="${fm.title}" loading="lazy">`
-                            : '<span>&#128202; 数据预览图</span>';
-                        const dlBtn = fm.download_url && fm.download_url !== '#'
-                            ? `<button class="btn-sm" onclick="location.href='${fm.download_url}'">${i18n[currentLang].btn_download}</button>`
-                            : '';
-                        html += `
-                            <div class="data-card">
-                                <div class="data-card-img">${imgHtml}</div>
-                                <div class="data-card-body">
-                                    <div class="data-card-title">${fm.title || ''}</div>
-                                    <div class="data-card-desc">${fm.card_count ? `${fm.card_count} 种卡牌` : ''}${fm.vote_count ? ` &middot; ${fm.vote_count} 人次` : ''}</div>
-                                    <div class="data-card-actions">
-                                        <button class="btn-sm primary">${i18n[currentLang].btn_view_img}</button>${dlBtn}
-                                    </div>
+            const files = contentManifest['survey-data'] || [];
+            let html = '';
+            for (const f of files) {
+                try {
+                    const res = await fetch(f);
+                    if (!res.ok) continue;
+                    const text = await res.text();
+                    const { frontmatter: fm } = parseFrontmatter(text);
+                    const imgHtml = fm.chart_image
+                        ? `<img src="${fm.chart_image}" alt="${fm.title}" loading="lazy">`
+                        : '<span>&#128202; 数据预览图</span>';
+                    const dlBtn = fm.download_url && fm.download_url !== '#'
+                        ? `<button class="btn-sm" onclick="location.href='${fm.download_url}'">${i18n[currentLang].btn_download}</button>`
+                        : '';
+                    html += `
+                        <div class="data-card">
+                            <div class="data-card-img">${imgHtml}</div>
+                            <div class="data-card-body">
+                                <div class="data-card-title">${fm.title || ''}</div>
+                                <div class="data-card-desc">${fm.card_count ? `${fm.card_count} 种卡牌` : ''}${fm.vote_count ? ` &middot; ${fm.vote_count} 人次` : ''}</div>
+                                <div class="data-card-actions">
+                                    <button class="btn-sm primary">${i18n[currentLang].btn_view_img}</button>${dlBtn}
                                 </div>
-                            </div>`;
-                    } catch(e) { /* skip */ }
-                }
-                if (html) container.innerHTML = html;
-            } catch(e) { console.warn('Failed to load survey data:', e); }
+                            </div>
+                        </div>`;
+                } catch(e) { /* skip */ }
+            }
+            if (html) container.innerHTML = html;
         }
 
         // ========== 视频列表 ==========
         async function renderVideos() {
             const container = document.getElementById('videoList');
-            try {
-                const files = ['content/videos/2026-04.md', 'content/videos/2026-03.md', 'content/videos/2026-02.md', 'content/videos/2026-01.md'];
-                let html = '';
-                for (const f of files) {
-                    try {
-                        const res = await fetch(f);
-                        if (!res.ok) continue;
-                        const text = await res.text();
-                        const { frontmatter: fm } = parseFrontmatter(text);
-                        const thumbHtml = fm.thumbnail ? `<img src="${fm.thumbnail}" loading="lazy">` : '<span>&#9654;</span>';
-                        html += `
-                            <a href="${fm.url || '#'}" target="_blank" rel="noopener noreferrer" class="video-item">
-                                <div class="video-thumb">${thumbHtml}</div>
-                                <div class="video-info">
-                                    <div class="video-title">${fm.title || ''}</div>
-                                    <div class="video-source">${fm.source || ''} &middot; ${fm.date || ''}</div>
-                                </div>
-                                <div class="video-arrow">&rarr;</div>
-                            </a>`;
-                    } catch(e) { /* skip */ }
-                }
-                if (html) container.innerHTML = html;
-            } catch(e) { console.warn('Failed to load videos:', e); }
+            const files = contentManifest.videos || [];
+            let html = '';
+            for (const f of files) {
+                try {
+                    const res = await fetch(f);
+                    if (!res.ok) continue;
+                    const text = await res.text();
+                    const { frontmatter: fm } = parseFrontmatter(text);
+                    const thumbHtml = fm.thumbnail ? `<img src="${fm.thumbnail}" loading="lazy">` : '<span>&#9654;</span>';
+                    html += `
+                        <a href="${fm.url || '#'}" target="_blank" rel="noopener noreferrer" class="video-item">
+                            <div class="video-thumb">${thumbHtml}</div>
+                            <div class="video-info">
+                                <div class="video-title">${fm.title || ''}</div>
+                                <div class="video-source">${fm.source || ''} &middot; ${fm.date || ''}</div>
+                            </div>
+                            <div class="video-arrow">&rarr;</div>
+                        </a>`;
+                } catch(e) { /* skip */ }
+            }
+            if (html) container.innerHTML = html;
         }
 
         // ========== 历次改动 ==========
         async function renderHistory() {
             const container = document.getElementById('historyList');
-            try {
-                const files = [
-                    'content/history/2026-04.md', 'content/history/2026-03.md', 'content/history/2026-02.md', 'content/history/2026-01.md',
-                    'content/history/2025-12.md', 'content/history/2025-11.md', 'content/history/2025-10.md', 'content/history/2025-09.md'
-                ];
-                let html = '';
-                for (const f of files) {
-                    try {
-                        const res = await fetch(f);
-                        if (!res.ok) continue;
-                        const text = await res.text();
-                        const { frontmatter: fm } = parseFrontmatter(text);
-                        const imgHtml = fm.image ? `<img src="${fm.image}" loading="lazy">` : '&#128203;';
-                        html += `
-                            <div class="history-item">
-                                <div class="history-item-img">${imgHtml}</div>
-                                <div class="history-item-info">
-                                    <div class="history-item-month">${fm.title || ''}</div>
-                                    <div class="history-item-count">+${fm.buffed || 0} 张加强 / ${fm.nerfed || 0} 张削弱</div>
-                                </div>
-                            </div>`;
-                    } catch(e) { /* skip */ }
-                }
-                if (html) container.innerHTML = html;
-            } catch(e) { console.warn('Failed to load history:', e); }
+            const files = contentManifest.history || [];
+            let html = '';
+            for (const f of files) {
+                try {
+                    const res = await fetch(f);
+                    if (!res.ok) continue;
+                    const text = await res.text();
+                    const { frontmatter: fm } = parseFrontmatter(text);
+                    const imgHtml = fm.image ? `<img src="${fm.image}" loading="lazy">` : '&#128203;';
+                    html += `
+                        <div class="history-item">
+                            <div class="history-item-img">${imgHtml}</div>
+                            <div class="history-item-info">
+                                <div class="history-item-month">${fm.title || ''}</div>
+                                <div class="history-item-count">+${fm.buffed || 0} 张加强 / ${fm.nerfed || 0} 张削弱</div>
+                            </div>
+                        </div>`;
+                } catch(e) { /* skip */ }
+            }
+            if (html) container.innerHTML = html;
         }
 
         // ===== 启动 =====
