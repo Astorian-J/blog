@@ -2,9 +2,8 @@ name: Auto Update Content Manifest
 
 on:
   push:
-    paths:
-      - 'content/**/*.md'
     branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: write
