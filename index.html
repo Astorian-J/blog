@@ -609,9 +609,15 @@
         /** 渲染所有板块 */
         let contentManifest = { news: [], articles: [], 'survey-data': [], videos: [], history: [] };
 
+        /** 带缓存破坏的 fetch，绕过 GitHub Pages CDN 缓存 */
+        function fetchNoCache(url) {
+            return fetch(`${url}?_=${Date.now()}`, { cache: 'no-store' });
+        }
+
         async function loadManifest() {
             try {
-                const res = await fetch('content/manifest.json');
+                const ts = Date.now();
+                const res = await fetch(`content/manifest.json?t=${ts}`, { cache: 'no-store' });
                 if (res.ok) contentManifest = await res.json();
             } catch(e) { console.warn('Failed to load manifest:', e); }
         }
@@ -628,7 +634,7 @@
             let newsItems = [];
             for (const f of files) {
                 try {
-                    const res = await fetch(f);
+                    const res = await fetchNoCache(f);
                     if (!res.ok) continue;
                     const text = await res.text();
                     const { frontmatter: fm } = parseFrontmatter(text);
@@ -663,7 +669,7 @@
                 _articlesData = [];
                 for (const f of files) {
                     try {
-                        const res = await fetch(f);
+                        const res = await fetchNoCache(f);
                         if (!res.ok) continue;
                         const text = await res.text();
                         const { frontmatter: fm, body } = parseFrontmatter(text);
@@ -716,7 +722,7 @@
                 _surveyData = [];
                 for (const f of files) {
                     try {
-                        const res = await fetch(f);
+                        const res = await fetchNoCache(f);
                         if (!res.ok) continue;
                         const text = await res.text();
                         const { frontmatter: fm } = parseFrontmatter(text);
@@ -773,7 +779,7 @@
                 _videoData = [];
                 for (const f of files) {
                     try {
-                        const res = await fetch(f);
+                        const res = await fetchNoCache(f);
                         if (!res.ok) continue;
                         const text = await res.text();
                         const { frontmatter: fm } = parseFrontmatter(text);
@@ -888,7 +894,7 @@
 
         async function openNewsModal(file) {
             try {
-                const res = await fetch(file);
+                const res = await fetchNoCache(file);
                 if (!res.ok) return;
                 const text = await res.text();
                 const data = parseFrontmatter(text);
@@ -906,7 +912,7 @@
             try {
                 let data = articleCache[file];
                 if (!data) {
-                    const res = await fetch(file);
+                    const res = await fetchNoCache(file);
                     if (!res.ok) return;
                     const text = await res.text();
                     data = parseFrontmatter(text);
