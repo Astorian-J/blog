@@ -82,18 +82,6 @@ COLLECTIONS = {
             {"name": "url", "label": "视频链接", "type": "text", "required": True},
         ],
     },
-    "history": {
-        "label": "📋 历次平衡改动",
-        "folder": "history",
-        "slug_format": "{year}-{month}",
-        "fields": [
-            {"name": "title", "label": "补丁名称", "type": "text", "required": True},
-            {"name": "date", "label": "发布日期", "type": "date", "required": True},
-            {"name": "buffed", "label": "加强数量", "type": "number"},
-            {"name": "nerfed", "label": "削弱数量", "type": "number"},
-            {"name": "notes", "label": "备注说明", "type": "markdown"},
-        ],
-    },
 }
 
 # ==================== 工具函数 ====================

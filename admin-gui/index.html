@@ -432,7 +432,7 @@ async function init() {
 // 分类键名（从后端获取后覆盖）
 let COLLECTION_CONFIG = {};
 
-const COLLECTION_KEYS = ['news', 'articles', 'survey-data', 'videos', 'history'];
+const COLLECTION_KEYS = ['news', 'articles', 'survey-data', 'videos'];
 
 // ==================== 加载分类列表 ====================
 async function loadCollections() {
@@ -448,7 +448,6 @@ async function loadCollections() {
       articles: '📝 文章发布',
       'survey-data': '📊 每月问卷数据',
       videos: '▶️ 平衡推荐视频',
-      history: '📋 历次平衡改动',
     };
     renderSidebar();
   }

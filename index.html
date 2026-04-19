@@ -342,7 +342,6 @@
             <li><a href="javascript:;" data-tab="articles" data-i18n="nav_articles">文章发布</a></li>
             <li><a href="javascript:;" data-tab="survey-data" data-i18n="nav_data">问卷数据</a></li>
             <li><a href="javascript:;" data-tab="videos" data-i18n="nav_videos">平衡视频</a></li>
-            <li><a href="javascript:;" data-tab="history" data-i18n="nav_history">历次改动</a></li>
         </ul>
         <div style="display:flex;align-items:center;gap:16px;">
             <div class="lang-switch" id="langSwitch" onclick="toggleLang()">
@@ -424,20 +423,6 @@
         </section>
         </div>
 
-        <!-- 板块五：历次平衡改动 -->
-        <div class="tab-panel" id="panel-history">
-        <section class="section" id="history" style="margin-top:20px;">
-            <div class="section-header">
-                <div class="section-icon"></div>
-                <h2 class="section-title" data-i18n="sec_history">历次平衡改动</h2>
-                <span class="section-subtitle" data-i18n="sec_history_sub">Patch History</span>
-            </div>
-            <div class="history-list" id="historyList">
-                <!-- JS动态渲染 -->
-            </div>
-            <div class="pagination" style="display:none;" id="historyPagination"></div>
-        </section>
-        </div>
 
     <!-- 文章详情弹窗 -->
     <div class="modal-overlay" id="articleModal" onclick="if(event.target===this)closeModal()">
@@ -466,14 +451,13 @@
             zh: {
                 logo: '昆特<span>平衡数据库</span>',
                 nav_news: '最新资讯', nav_articles: '文章发布',
-                nav_data: '问卷数据', nav_videos: '平衡视频', nav_history: '历次改动',
+                nav_data: '问卷数据', nav_videos: '平衡视频',
                 hero_title: '中国社区昆特平衡数据库',
                 hero_desc: '记录每一次社区平衡投票，用数据见证昆特环境的变迁',
                 sec_news: '最新平衡资讯', sec_news_sub: 'Latest News',
                 sec_articles: '文章发布', sec_articles_sub: 'Articles',
                 sec_data: '每月问卷数据', sec_data_sub: 'Survey Data',
                 sec_videos: '每月平衡推荐视频', sec_videos_sub: 'Balance Videos',
-                sec_history: '历次平衡改动', sec_history_sub: 'Patch History',
                 tag_hot: 'HOT',
                 btn_view_img: '查看图表', btn_raw: '原始问卷', btn_stat: '统计结果', btn_video: '相关视频',
                 footer_copyright: '&copy; 2026 中国社区昆特平衡数据库',
@@ -483,14 +467,13 @@
             en: {
                 logo: 'Gwent<span>DB</span>',
                 nav_news: 'News', nav_articles: 'Articles',
-                nav_data: 'Survey Data', nav_videos: 'Videos', nav_history: 'History',
+                nav_data: 'Survey Data', nav_videos: 'Videos',
                 hero_title: 'CN Community Gwent Balance Database',
                 hero_desc: 'Tracking every community balance vote, witnessing meta evolution through data.',
                 sec_news: 'Latest Balance News', sec_news_sub: 'Latest News',
                 sec_articles: 'Articles', sec_articles_sub: 'Articles',
                 sec_data: 'Monthly Survey Data', sec_data_sub: 'Survey Data',
                 sec_videos: 'Balance Recommendation Videos', sec_videos_sub: 'Videos',
-                sec_history: 'Historical Balance Changes', sec_history_sub: 'Patch History',
                 tag_hot: 'HOT',
                 btn_view_img: 'View Chart', btn_raw: 'Raw Data', btn_stat: 'Statistics', btn_video: 'Video',
                 footer_copyright: '&copy; 2026 CN Community Gwent Balance Database',
@@ -554,8 +537,7 @@
             // 触发对应板块的数据渲染（确保首次切换时加载数据）
             if (tabId === 'articles' && _articlesData.length === 0) renderArticles();
             else if (tabId === 'survey-data' && _surveyData.length === 0) renderSurveyData();
-            else if (tabId === 'videos' && _videoData.length === 0) renderVideos();
-            else if (tabId === 'history' && _historyData.length === 0) renderHistory();
+            else             if (tabId === 'videos' && _videoData.length === 0) renderVideos();
         }
 
         // 导航链接点击 → 标签切换
@@ -626,7 +608,7 @@
 
         async function renderAllContent() {
             await loadManifest();
-            await Promise.all([renderNews(), renderArticles(), renderSurveyData(), renderVideos(), renderHistory()]);
+            await Promise.all([renderNews(), renderArticles(), renderSurveyData(), renderVideos()]);
         }
 
         // ========== 最新资讯（按日期倒序） ==========
@@ -814,59 +796,11 @@
             buildPagination('videos');
         }
 
-        // ========== 历次改动（分页） ==========
-        let _historyData = [];
-
-        async function renderHistory() {
-            const container = document.getElementById('historyList');
-            const files = contentManifest.history || [];
-
-            if (_historyData.length !== files.length) {
-                _historyData = [];
-                for (const f of files) {
-                    try {
-                        const res = await fetch(f);
-                        if (!res.ok) continue;
-                        const text = await res.text();
-                        const { frontmatter: fm } = parseFrontmatter(text);
-                        _historyData.push({ file: f, fm });
-                    } catch(e) { /* skip */ }
-                }
-                sortByDateDesc(_historyData);
-            }
-
-            if (!pageState.history) {
-                pageState.history = { page: 1, total: files.length, renderFn: renderHistory };
-            }
-            pageState.history.total = files.length;
-
-            const ps = PAGE_SIZE.history;
-            const start = (pageState.history.page - 1) * ps;
-            const pageItems = _historyData.slice(start, start + ps);
-
-            let html = '';
-            for (const item of pageItems) {
-                const { f, fm } = item;
-                const imgHtml = fm.image ? `<img src="${fm.image}" loading="lazy">` : '&#128203;';
-                html += `
-                    <div class="history-item">
-                        <div class="history-item-img">${imgHtml}</div>
-                        <div class="history-item-info">
-                            <div class="history-item-month">${fm.title || ''}</div>
-                            <div class="history-item-count">+${fm.buffed || 0} 张加强 / ${fm.nerfed || 0} 张削弱</div>
-                        </div>
-                    </div>`;
-            }
-            if (html) container.innerHTML = html;
-            buildPagination('history');
-        }
-
         // ===== 通用分页工具 =====
         const PAGE_SIZE = {
             articles: 8,
             'survey-data': 9,
-            videos: 9,
-            history: 12
+            videos: 9
         };
         const pageState = {}; // { section: { page: N, items: [], renderFn: func } }
 
