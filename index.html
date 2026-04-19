@@ -475,7 +475,7 @@
                 sec_videos: '每月平衡推荐视频', sec_videos_sub: 'Balance Videos',
                 sec_history: '历次平衡改动', sec_history_sub: 'Patch History',
                 tag_hot: 'HOT',
-                btn_view_img: '查看图表', btn_raw: '原始问卷', btn_stat: '统计结果',
+                btn_view_img: '查看图表', btn_raw: '原始问卷', btn_stat: '统计结果', btn_video: '相关视频',
                 footer_copyright: '&copy; 2026 中国社区昆特平衡数据库',
                 footer_powered: 'Powered by <a href="#">GitHub Pages</a>',
                 tag_announce: '公告', tag_guide: '教程', tag_analysis: '分析'
@@ -492,7 +492,7 @@
                 sec_videos: 'Balance Recommendation Videos', sec_videos_sub: 'Videos',
                 sec_history: 'Historical Balance Changes', sec_history_sub: 'Patch History',
                 tag_hot: 'HOT',
-                btn_view_img: 'View Chart', btn_raw: 'Raw Data', btn_stat: 'Statistics',
+                btn_view_img: 'View Chart', btn_raw: 'Raw Data', btn_stat: 'Statistics', btn_video: 'Video',
                 footer_copyright: '&copy; 2026 CN Community Gwent Balance Database',
                 footer_powered: 'Powered by <a href="#">GitHub Pages</a>',
                 tag_announce: 'Announce', tag_guide: 'Guide', tag_analysis: 'Analysis'
@@ -746,10 +746,13 @@
                     ? `<img src="${fm.chart_image}" alt="${fm.title}" loading="lazy">`
                     : '<span>&#128202; 数据预览图</span>';
                 const rawBtn = fm.raw_url && fm.raw_url !== '#'
-                    ? `<button class="btn-sm" onclick="location.href='${fm.raw_url}'">${i18n[currentLang].btn_raw}</button>`
+                    ? `<button class="btn-sm" onclick="window.open('${fm.raw_url}','_blank')">${i18n[currentLang].btn_raw}</button>`
                     : '';
                 const statBtn = fm.stat_url && fm.stat_url !== '#'
-                    ? `<button class="btn-sm" onclick="location.href='${fm.stat_url}'">${i18n[currentLang].btn_stat}</button>`
+                    ? `<button class="btn-sm" onclick="window.open('${fm.stat_url}','_blank')">${i18n[currentLang].btn_stat}</button>`
+                    : '';
+                const videoBtn = fm.video_url && fm.video_url !== '#'
+                    ? `<button class="btn-sm primary" onclick="window.open('${fm.video_url}','_blank')" style="background:var(--accent);color:#fff;">${i18n[currentLang].btn_video}</button>`
                     : '';
                 html += `
                     <div class="data-card">
@@ -758,7 +761,7 @@
                             <div class="data-card-title">${fm.title || ''}</div>
                             <div class="data-card-desc">${fm.vote_count ? `${fm.vote_count} 人次` : ''}</div>
                             <div class="data-card-actions">
-                                <button class="btn-sm primary">${i18n[currentLang].btn_view_img}</button>${rawBtn}${statBtn}
+                                <button class="btn-sm primary">${i18n[currentLang].btn_view_img}</button>${rawBtn}${statBtn}${videoBtn}
                             </div>
                         </div>
                     </div>`;

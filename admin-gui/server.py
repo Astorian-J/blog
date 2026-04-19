@@ -64,9 +64,10 @@ COLLECTIONS = {
             {"name": "title", "label": "月份标题", "type": "text", "required": True},
             {"name": "year", "label": "年份", "type": "number", "required": True},
             {"name": "month", "label": "月份", "type": "number", "required": True},
-            {"name": "card_count", "label": "卡牌种类数", "type": "number"},
             {"name": "vote_count", "label": "投票人次", "type": "number"},
-            {"name": "download_url", "label": "表格下载链接", "type": "text"},
+            {"name": "raw_url", "label": "原始问卷表格", "type": "text"},
+            {"name": "stat_url", "label": "问卷统计结果", "type": "text"},
+            {"name": "video_url", "label": "相关视频链接", "type": "text"},
             {"name": "description", "label": "备注说明", "type": "textarea"},
         ],
     },
@@ -331,7 +332,7 @@ class AdminHandler(SimpleHTTPRequestHandler):
             return
         
         # API: 获取某分类的所有文件
-        match = re.match(r'^/api/(\w+)/files$', path)
+        match = re.match(r'^/api/([\w-]+)/files$', path)
         if match:
             col_name = match.group(1)
             if col_name in COLLECTIONS:
@@ -355,7 +356,7 @@ class AdminHandler(SimpleHTTPRequestHandler):
             return
         
         # API: 获取分类字段定义
-        match = re.match(r'^/api/(\w+)/fields$', path)
+        match = re.match(r'^/api/([\w-]+)/fields$', path)
         if match:
             col_name = match.group(1)
             if col_name in COLLECTIONS:
