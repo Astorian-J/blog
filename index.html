@@ -600,6 +600,20 @@
         /** 获取内容文件列表的基准路径 */
         const CONTENT_BASE = '';
 
+        /**
+         * 按日期倒序排序（新在前）
+         * @param {Array} arr - [{ file, fm, body? }] 数组
+         */
+        function sortByDateDesc(arr) {
+            return arr.sort((a, b) => {
+                const da = (a.fm && a.fm.date) || '';
+                const db = (b.fm && b.fm.date) || '';
+                // 字符串比较，格式为 YYYY-MM-DD
+                if (da === db) return 0;
+                return da > db ? -1 : 1;
+            });
+        }
+
         /** 渲染所有板块 */
         let contentManifest = { news: [], articles: [], 'survey-data': [], videos: [], history: [] };
 
@@ -615,18 +629,25 @@
             await Promise.all([renderNews(), renderArticles(), renderSurveyData(), renderVideos(), renderHistory()]);
         }
 
-        // ========== 最新资讯 ==========
+        // ========== 最新资讯（按日期倒序） ==========
         async function renderNews() {
             const container = document.getElementById('newsGrid');
             const files = contentManifest.news || [];
-            let html = '';
+            let newsItems = [];
             for (const f of files) {
                 try {
                     const res = await fetch(f);
                     if (!res.ok) continue;
                     const text = await res.text();
                     const { frontmatter: fm } = parseFrontmatter(text);
-                    html += `
+                    newsItems.push({ file: f, fm });
+                } catch(e) { /* skip */ }
+            }
+            sortByDateDesc(newsItems);
+            let html = '';
+            for (const item of newsItems) {
+                const { file: f, fm } = item;
+                html += `
                         <div class="news-card" style="cursor:pointer;" onclick="openNewsModal('${f}')">
                             <div class="news-card-header">
                                 ${fm.hot ? `<span class="news-tag">${i18n[currentLang].tag_hot}</span>` : ''}
@@ -634,7 +655,6 @@
                             </div>
                             <p class="news-text">${fm.excerpt || fm.title || ''}</p>
                         </div>`;
-                } catch(e) { /* skip */ }
             }
             if (html) container.innerHTML = html;
         }
@@ -658,6 +678,7 @@
                         _articlesData.push({ file: f, fm, body });
                     } catch(e) { /* skip */ }
                 }
+                sortByDateDesc(_articlesData);
             }
 
             // 初始化分页状态 — 用 manifest 总数，不用加载成功数
@@ -706,6 +727,7 @@
                         _surveyData.push({ file: f, fm });
                     } catch(e) { /* skip */ }
                 }
+                sortByDateDesc(_surveyData);
             }
 
             if (!pageState['survey-data']) {
@@ -760,6 +782,7 @@
                         _videoData.push({ file: f, fm });
                     } catch(e) { /* skip */ }
                 }
+                sortByDateDesc(_videoData);
             }
 
             if (!pageState.videos) {
@@ -807,6 +830,7 @@
                         _historyData.push({ file: f, fm });
                     } catch(e) { /* skip */ }
                 }
+                sortByDateDesc(_historyData);
             }
 
             if (!pageState.history) {
