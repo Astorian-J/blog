@@ -5,7 +5,6 @@ on:
     branches: [main]
   workflow_dispatch:
 
-# 防止同一 workflow 多次并发运行
 concurrency:
   group: auto-manifest
   cancel-in-progress: true
@@ -16,7 +15,6 @@ permissions:
 jobs:
   update-manifest:
     runs-on: ubuntu-latest
-    # 跳过由本 workflow 自身触发的提交（[skip ci] 不够可靠）
     if: |
       !contains(github.event.head_commit.message, 'auto: update manifest')
     steps:
@@ -24,43 +22,38 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Ensure content directories exist
+        run: |
+          mkdir -p content/news content/articles content/survey-data content/videos content/history
+
       - name: Generate manifest.json
         run: |
-          echo '{' > content/manifest.json
-          echo '  "news": [' >> content/manifest.json
-          for f in $(find content/news -name '*.md' | sort -r | head -20); do echo "    \"${f}\"," >> content/manifest.json; done
-          echo '  ],' >> content/manifest.json
-          echo '  "articles": [' >> content/manifest.json
-          for f in $(find content/articles -name '*.md' | sort -r | head -20); do echo "    \"${f}\"," >> content/manifest.json; done
-          echo '  ],' >> content/manifest.json
-          echo '  "survey-data": [' >> content/manifest.json
-          for f in $(find content/survey-data -name '*.md' | sort -r | head -12); do echo "    \"${f}\"," >> content/manifest.json; done
-          echo '  ],' >> content/manifest.json
-          echo '  "videos": [' >> content/manifest.json
-          for f in $(find content/videos -name '*.md' | sort -r | head -12); do echo "    \"${f}\"," >> content/manifest.json; done
-          echo '  ],' >> content/manifest.json
-          echo '  "history": [' >> content/manifest.json
-          for f in $(find content/history -name '*.md' | sort -r | head -24); do echo "    \"${f}\"," >> content/manifest.json; done
-          echo '  ]' >> content/manifest.json
-          echo '}' >> content/manifest.json
-          # Fix trailing commas (simple approach)
-          python3 -c "
-import re, json
-with open('content/manifest.json','r') as f: txt=f.read()
-txt=re.sub(r',\s*(\]|\})', r'\1', txt)
-json.loads(txt)
-with open('content/manifest.json','w') as f: f.write(txt)
-print('manifest.json generated OK')
-"
+          cat > gen_manifest.py << 'PYEOF'
+          import os, json
+
+          collections = ["news", "articles", "survey-data", "videos", "history"]
+          manifest = {}
+
+          for col in collections:
+              d = os.path.join("content", col)
+              files = []
+              if os.path.isdir(d):
+                  for f in sorted(os.listdir(d), reverse=True):
+                      if f.endswith('.md'):
+                          files.append(f"{col}/{f}")
+              manifest[col] = files
+
+          with open("content/manifest.json", "w", encoding="utf-8") as fp:
+              json.dump(manifest, fp, indent=2, ensure_ascii=False)
+          
+          print(f"manifest.json generated: {sum(len(v) for v in manifest.values())} files total")
+          PYEOF
+          python3 gen_manifest.py
 
       - name: Check for changes
         id: check_changes
         run: |
-          if git diff --exit-code content/manifest.json; then
-            echo "changed=false" >> $GITHUB_OUTPUT
-          else
-            echo "changed=true" >> $GITHUB_OUTPUT
-          fi
+          git diff --exit-code content/manifest.json && echo "changed=false" >> $GITHUB_OUTPUT || echo "changed=true" >> $GITHUB_OUTPUT
 
       - name: Commit and push updated manifest
         if: steps.check_changes.outputs.changed == 'true'
@@ -68,5 +61,6 @@ print('manifest.json generated OK')
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add content/manifest.json
+          git diff --cached --quiet && echo "No staged changes" && exit 0
           git commit -m "auto: update manifest.json [skip ci]"
           git push
