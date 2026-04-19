@@ -252,13 +252,33 @@ def git_push(commit_msg="update content"):
             return {"success": True, "message": "没有变更需要提交"}
         
         # 先拉取远程最新（rebase 模式避免合并提交）
-        subprocess.run(
+        pull_result = subprocess.run(
             [GIT_EXE, "pull", "--rebase"],
             cwd=str(BLOG_DIR),
             capture_output=True,
             text=True,
             timeout=30,
         )
+        
+        # 如果 pull 失败（冲突），放弃 rebase 并提示用户
+        if pull_result.returncode != 0:
+            # 尝试自动解决：用远程版本覆盖冲突文件
+            subprocess.run(
+                [GIT_EXE, "rebase", "--abort"],
+                cwd=str(BLOG_DIR),
+                capture_output=True,
+                timeout=10,
+            )
+            # 重新用 merge 方式拉取
+            merge_result = subprocess.run(
+                [GIT_EXE, "pull", "--no-rebase", "-X", "theirs"],
+                cwd=str(BLOG_DIR),
+                capture_output=True,
+                text=True,
+                timeout=30,
+            )
+            if merge_result.returncode != 0:
+                return {"success": False, "message": f"同步远程变更失败，请手动在 blog 目录执行 git pull 后重试: {merge_result.stderr}"}
         
         # git commit
         now = datetime.now().strftime("%Y-%m-%d %H:%M")
