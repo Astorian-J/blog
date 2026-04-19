@@ -599,10 +599,19 @@ async function renderEditForm(colName, values) {
         formHtml += `<div class="form-group"><label>${field.label}${required}</label>
           <select class="form-control" id="f_${field.name}">${opts}</select></div>`;
       } else if (field.type === 'textarea' || field.type === 'markdown') {
+        const isMarkdown = field.type === 'markdown';
+        const uploadBtn = isMarkdown ? `
+          <div style="display:flex;align-items:center;gap:10px;margin-top:6px;">
+            <label class="btn btn-sm" style="cursor:pointer;background:var(--bg-tertiary);border-color:var(--accent);color:var(--accent);padding:5px 14px;font-size:12px;border-radius:6px;display:inline-flex;align-items:center;gap:4px;">
+              🖼 插入图片
+              <input type="file" accept=".png,.jpg,.jpeg,.gif,.webp,.svg" onchange="uploadImageForField(this, 'f_${field.name}')" style="display:none;">
+            </label>
+            <span id="img-status-${field.name}" style="font-size:12px;color:var(--text-secondary);"></span>
+          </div>` : '';
         const hint = field.hint ? `<div class="editor-hint">${field.hint}</div>` : '';
         formHtml += `<div class="form-group"><label>${field.label}${required}</label>
-          <textarea class="form-control" id="f_${field.name}" rows="${field.type==='markdown'?8:3}"
-          placeholder="${field.hint || ''}">${escapeHtml(val)}</textarea>${hint}</div>`;
+          <textarea class="form-control" id="f_${field.name}" rows="${isMarkdown?8:3}"
+          placeholder="${field.hint || ''}">${escapeHtml(val)}</textarea>${uploadBtn}${hint}</div>`;
       } else {
         const hint = field.hint ? `<div class="editor-hint">${field.hint}</div>` : '';
         formHtml += `<div class="form-group"><label>${field.label}${required}</label>
@@ -796,6 +805,46 @@ function escapeHtml(str) {
 function escapeJs(str) {
   if (!str || typeof str !== 'string') return '';
   return str.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"');
+}
+
+// ==================== 图片上传（Markdown 编辑器） ====================
+async function uploadImageForField(inputEl, textareaId) {
+  const file = inputEl.files[0];
+  if (!file) return;
+
+  const statusEl = document.getElementById(`img-status-${textareaId.replace('f_', '')}`);
+  if (statusEl) statusEl.textContent = '⏳ 上传中...';
+
+  const formData = new FormData();
+  formData.append('image', file);
+
+  try {
+    const res = await fetch(API + '/api/upload-image', {
+      method: 'POST',
+      body: formData,
+    });
+    const result = await res.json();
+
+    if (result.success) {
+      // 在光标位置或末尾插入 Markdown 图片语法
+      const ta = document.getElementById(textareaId);
+      const imgMd = `\n![${file.name}](${result.url})\n`;
+      const pos = ta.selectionStart;
+      ta.value = ta.value.slice(0, pos) + imgMd + ta.value.slice(pos.selectionEnd ?? pos);
+      ta.focus();
+      ta.setSelectionRange(pos + imgMd.length, pos + imgMd.length);
+      if (statusEl) statusEl.textContent = '✅ 图片已插入';
+    } else {
+      showToast('error', '❌ ' + (result.error || '上传失败'));
+      if (statusEl) statusEl.textContent = '❌ 上传失败';
+    }
+  } catch(err) {
+    showToast('error', '❌ 上传失败: ' + err.message);
+    if (statusEl) statusEl.textContent = '❌ 网络错误';
+  }
+
+  // 重置 file input，允许重复选择同一文件
+  inputEl.value = '';
 }
 
 // ==================== 启动 ====================

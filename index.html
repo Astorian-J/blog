@@ -160,6 +160,14 @@
             font-size: 13.5px; color: var(--text-secondary); line-height: 1.7;
             display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
         }
+        .post-source-btn {
+            display: inline-flex; align-items: center; gap: 4px;
+            margin-top: 10px; padding: 4px 14px;
+            border-radius: 6px; font-size: 12px; font-weight: 500;
+            background: rgba(37,99,235,0.06); color: var(--accent);
+            border: 1px solid rgba(37,99,235,0.15); transition: all 0.2s;
+        }
+        .post-source-btn:hover { background: rgba(37,99,235,0.12); border-color: var(--accent); }
 
         /* ===== 数据卡片（问卷数据） ===== */
         .data-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
@@ -460,6 +468,7 @@
                 sec_videos: '每月平衡推荐视频', sec_videos_sub: 'Balance Videos',
                 tag_hot: 'HOT',
                 btn_view_img: '查看图表', btn_raw: '原始问卷', btn_stat: '统计结果', btn_video: '相关视频',
+                btn_source: '查看原文',
                 footer_copyright: '&copy; 2026 中国社区昆特平衡数据库',
                 footer_powered: 'Powered by <a href="#">GitHub Pages</a>',
                 tag_announce: '公告', tag_guide: '教程', tag_analysis: '分析'
@@ -476,6 +485,7 @@
                 sec_videos: 'Balance Recommendation Videos', sec_videos_sub: 'Videos',
                 tag_hot: 'HOT',
                 btn_view_img: 'View Chart', btn_raw: 'Raw Data', btn_stat: 'Statistics', btn_video: 'Video',
+                btn_source: 'View Source',
                 footer_copyright: '&copy; 2026 CN Community Gwent Balance Database',
                 footer_powered: 'Powered by <a href="#">GitHub Pages</a>',
                 tag_announce: 'Announce', tag_guide: 'Guide', tag_analysis: 'Analysis'
@@ -677,6 +687,9 @@
             for (const item of pageItems) {
                 const { file, fm } = item;
                 const tagMap = { 公告: i18n[currentLang].tag_announce, 教程: i18n[currentLang].tag_guide, 分析: i18n[currentLang].tag_analysis };
+                const sourceBtn = fm.source_url && fm.source_url !== '#'
+                    ? `<a href="${fm.source_url}" target="_blank" rel="noopener noreferrer" class="post-source-btn" onclick="event.stopPropagation()">🔗 ${i18n[currentLang].btn_source || '查看原文'}</a>`
+                    : '';
                 html += `
                     <article class="post-card" onclick="openArticleModal('${file}')">
                         <div class="post-meta">
@@ -685,6 +698,7 @@
                         </div>
                         <h3 class="post-title">${fm.title || ''}</h3>
                         <p class="post-excerpt">${fm.excerpt || ''}</p>
+                        ${sourceBtn}
                     </article>`;
             }
             if (html) container.innerHTML = html;
@@ -900,9 +914,12 @@
                 }
                 document.getElementById('modalTitle').textContent = data.frontmatter.title || '';
                 const tagMap = { 公告: '公告', 教程: '教程', 分析: '分析' };
+                const sourceLink = data.frontmatter.source_url && data.frontmatter.source_url !== '#'
+                    ? `<a href="${data.frontmatter.source_url}" target="_blank" rel="noopener noreferrer" style="margin-left:12px;color:var(--accent);font-size:13px;font-weight:500;text-decoration:none;">🔗 ${i18n[currentLang].btn_source || '查看原文'}</a>`
+                    : '';
                 document.getElementById('modalMeta').innerHTML =
                     `<span class="tag${data.frontmatter.tag === '公告' ? ' highlight' : ''}">${tagMap[data.frontmatter.tag] || data.frontmatter.tag || ''}</span>` +
-                    ` &nbsp; ${data.frontmatter.date || ''}`;
+                    ` &nbsp; ${data.frontmatter.date || ''}${sourceLink}`;
                 document.getElementById('modalBody').innerHTML = renderMd(data.body);
                 document.getElementById('articleModal').classList.add('active');
                 document.body.style.overflow = 'hidden';

@@ -11,6 +11,7 @@ import json
 import re
 import subprocess
 import urllib.parse
+import uuid
 from datetime import datetime
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from socketserver import ThreadingMixIn
@@ -24,6 +25,7 @@ class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
 # ==================== 配置 ====================
 BLOG_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # blog/ 目录
 CONTENT_DIR = os.path.join(BLOG_DIR, "content")
+IMAGES_DIR = os.path.join(CONTENT_DIR, "images")
 MANIFEST_FILE = os.path.join(CONTENT_DIR, "manifest.json")
 GIT_EXE = r"C:\Program Files\Git\cmd\git.exe"
 
@@ -53,7 +55,8 @@ COLLECTIONS = {
             {"name": "date", "label": "日期", "type": "date", "required": True},
             {"name": "tag", "label": "分类标签", "type": "select", "options": ["公告", "教程", "分析", "杂谈"]},
             {"name": "excerpt", "label": "文章摘要", "type": "textarea"},
-            {"name": "body", "label": "正文内容", "type": "markdown", "required": True},
+            {"name": "source_url", "label": "原文链接", "type": "text", "hint": "原文出处链接，可选，前台会显示「查看原文」按钮"},
+            {"name": "body", "label": "正文内容（支持 Markdown 图片语法）", "type": "markdown", "required": True, "hint": "支持图片: ![描述](图片路径) | 可用下方按钮插入本地图片"},
         ],
     },
     "survey-data": {
@@ -222,14 +225,6 @@ def update_manifest():
 def git_push(commit_msg="update content"):
     """执行 Git 提交和推送操作"""
     try:
-        # git add -A
-        subprocess.run(
-            [GIT_EXE, "add", "-A"],
-            cwd=str(BLOG_DIR),
-            capture_output=True,
-            check=True,
-        )
-        
         # 检查是否有变更
         status = subprocess.run(
             [GIT_EXE, "status", "--porcelain"],
@@ -239,37 +234,16 @@ def git_push(commit_msg="update content"):
         )
         if not status.stdout.strip():
             return {"success": True, "message": "没有变更需要提交"}
-        
-        # 先拉取远程最新（rebase 模式避免合并提交）
-        pull_result = subprocess.run(
-            [GIT_EXE, "pull", "--rebase"],
+
+        # 1️⃣ 先 git add -A（暂存所有改动）
+        subprocess.run(
+            [GIT_EXE, "add", "-A"],
             cwd=str(BLOG_DIR),
             capture_output=True,
-            text=True,
-            timeout=30,
+            check=True,
         )
-        
-        # 如果 pull 失败（冲突），放弃 rebase 并提示用户
-        if pull_result.returncode != 0:
-            # 尝试自动解决：用远程版本覆盖冲突文件
-            subprocess.run(
-                [GIT_EXE, "rebase", "--abort"],
-                cwd=str(BLOG_DIR),
-                capture_output=True,
-                timeout=10,
-            )
-            # 重新用 merge 方式拉取
-            merge_result = subprocess.run(
-                [GIT_EXE, "pull", "--no-rebase", "-X", "theirs"],
-                cwd=str(BLOG_DIR),
-                capture_output=True,
-                text=True,
-                timeout=30,
-            )
-            if merge_result.returncode != 0:
-                return {"success": False, "message": f"同步远程变更失败，请手动在 blog 目录执行 git pull 后重试: {merge_result.stderr}"}
-        
-        # git commit
+
+        # 2️⃣ 提交本地改动
         now = datetime.now().strftime("%Y-%m-%d %H:%M")
         msg = f"cms: {commit_msg} ({now})"
         subprocess.run(
@@ -278,8 +252,35 @@ def git_push(commit_msg="update content"):
             capture_output=True,
             check=True,
         )
-        
-        # git push
+
+        # 3️⃣ 拉取远程最新（rebase 模式，保持提交历史整洁）
+        pull_result = subprocess.run(
+            [GIT_EXE, "pull", "--rebase"],
+            cwd=str(BLOG_DIR),
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+
+        if pull_result.returncode != 0:
+            # rebase 失败 → 放弃 rebase
+            subprocess.run([GIT_EXE, "rebase", "--abort"], cwd=str(BLOG_DIR), capture_output=True, timeout=10)
+            # 用普通 merge 拉取，自动用本地版本覆盖冲突文件（因为我们刚提交过）
+            merge_result = subprocess.run(
+                [GIT_EXE, "pull", "--no-rebase", "-X", "ours"],
+                cwd=str(BLOG_DIR),
+                capture_output=True,
+                text=True,
+                timeout=30,
+            )
+            if merge_result.returncode != 0:
+                # 最后手段：强制用本地版本重置
+                subprocess.run(
+                    [GIT_EXE, "reset", "--hard", "HEAD"],
+                    cwd=str(BLOG_DIR), capture_output=True, timeout=10,
+                )
+
+        # 4️⃣ 推送到远程
         result = subprocess.run(
             [GIT_EXE, "push"],
             cwd=str(BLOG_DIR),
@@ -392,6 +393,14 @@ class AdminHandler(SimpleHTTPRequestHandler):
             self.send_json({'error': f'服务器内部错误: {str(e)}'}, status=500)
 
     def _do_post(self):
+        parsed = urllib.parse.urlparse(self.path)
+        path = parsed.path
+
+        # API: 图片上传（必须在读取 body 前处理，因为它是 multipart 而非 JSON）
+        if path == '/api/upload-image':
+            self._handle_image_upload()
+            return
+
         length = int(self.headers.get('Content-Length', 0))
         raw_data = self.rfile.read(length)
         
@@ -399,9 +408,6 @@ class AdminHandler(SimpleHTTPRequestHandler):
             data = json.loads(raw_data) if raw_data else {}
         except:
             data = {}
-        
-        parsed = urllib.parse.urlparse(self.path)
-        path = parsed.path
         
         # API: 新增内容
         if path == '/api/add':
@@ -479,8 +485,74 @@ class AdminHandler(SimpleHTTPRequestHandler):
             result = git_push(data.get('message', '发布内容更新'))
             self.send_json(result)
             return
-        
+
         self.send_error(404)
+
+    def _handle_image_upload(self):
+        """处理图片上传（multipart/form-data），保存到 content/images/"""
+        try:
+            content_type = self.headers.get('Content-Type', '')
+            if 'multipart/form-data' not in content_type:
+                self.send_json({'error': '需要 multipart/form-data 格式'}, status=400)
+                return
+
+            # 解析 boundary
+            boundary = content_type.split('boundary=')[-1].encode()
+            body_bytes = self.rfile.read(int(self.headers.get('Content-Length', 0)))
+
+            # 简单解析 multipart，找到文件数据
+            parts = body_bytes.split(b'--' + boundary)
+            file_data = None
+            filename = None
+
+            for part in parts:
+                if b'filename=' not in part:
+                    continue
+                header_end = part.find(b'\r\n\r\n')
+                if header_end == -1:
+                    continue
+                headers_part = part[:header_end].decode('utf-8', errors='ignore')
+                fn_match = re.search(r'filename="(.+)"', headers_part)
+                if fn_match:
+                    filename = fn_match.group(1)
+                    file_data = part[header_end + 4:].rstrip(b'\r\n--').rstrip(b'\r\n')
+                    break
+
+            if not file_data or not filename:
+                self.send_json({'error': '未找到上传的文件'}, status=400)
+                return
+
+            # 安全化文件名：只保留字母数字和点
+            safe_name = re.sub(r'[^\w\.\-]', '', os.path.splitext(filename)[0])
+            ext = os.path.splitext(filename)[1].lower() or '.png'
+            allowed_exts = {'.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg'}
+            if ext not in allowed_exts:
+                self.send_json({'error': f'不支持的文件格式: {ext}，允许 {allowed_exts}'}, status=400)
+                return
+
+            # 限制单张 5MB
+            if len(file_data) > 5 * 1024 * 1024:
+                self.send_json({'error': '图片大小不能超过 5MB'}, status=400)
+                return
+
+            # 生成唯一文件名
+            unique_name = f"{uuid.uuid4().hex[:8]}_{safe_name}{ext}"
+            os.makedirs(IMAGES_DIR, exist_ok=True)
+            filepath = os.path.join(IMAGES_DIR, unique_name)
+
+            with open(filepath, 'wb') as f:
+                f.write(file_data)
+
+            # 返回相对于 blog 根目录的路径（用于 Markdown 图片引用）
+            rel_path = f"content/images/{unique_name}"
+            self.send_json({
+                'success': True,
+                'url': rel_path,
+                'message': f'图片已保存: {unique_name}'
+            })
+
+        except Exception as e:
+            self.send_json({'error': f'上传失败: {str(e)}'}, status=500)
 
     def send_json(self, data, status=200):
         """发送 JSON 响应"""
