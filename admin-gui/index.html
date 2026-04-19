@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🖥 博客管理后台 — 中国社区昆特平衡数据库</title>
+  <style>
+    /* ==================== 全局样式 ==================== */
+    :root {
+      --bg-primary: #0d1117;
+      --bg-secondary: #161b22;
+      --bg-tertiary: #21262d;
+      --border: #30363d;
+      --text-primary: #e6edf3;
+      --text-secondary: #8b949e;
+      --accent: #58a6ff;
+      --accent-hover: #79c0ff;
+      --green: #3fb950;
+      --green-bg: rgba(63,185,80,0.15);
+      --red: #f85149;
+      --red-bg: rgba(248,81,73,0.15);
+      --orange: #d29922;
+      --orange-bg: rgba(210,153,34,0.15);
+      --purple: #bc8cff;
+      --radius: 8px;
+      --shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* ==================== 顶部导航栏 ==================== */
+    .topbar {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .topbar h1 { font-size: 18px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+    .topbar-actions { display: flex; gap: 10px; align-items: center; }
+    .status-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--green); animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; } 50% { opacity: 0.4; }
+    }
+
+    /* ==================== 按钮系统 ==================== */
+    .btn {
+      padding: 8px 18px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center; gap: 6px;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .btn:hover { background: var(--border); transform: translateY(-1px); }
+    .btn:active { transform: translateY(0); }
+    .btn-primary {
+      background: linear-gradient(135deg, #238636, #2ea043);
+      border-color: rgba(63,185,80,0.4);
+      color: #fff;
+    }
+    .btn-primary:hover { background: linear-gradient(135deg, #2ea043, #3fb950); }
+    .btn-danger { background: var(--red-bg); border-color: rgba(248,81,73,0.3); color: var(--red); }
+    .btn-danger:hover { background: rgba(248,81,73,0.25); }
+    .btn-sm { padding: 5px 12px; font-size: 13px; }
+    .btn-lg { padding: 10px 24px; font-size: 16px; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+
+    /* ==================== 主布局 ==================== */
+    .main-layout {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      min-height: calc(100vh - 53px);
+    }
+
+    /* ==================== 侧边栏 ==================== */
+    .sidebar {
+      background: var(--bg-secondary);
+      border-right: 1px solid var(--border);
+      padding: 16px 0;
+      overflow-y: auto;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 20px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.15s;
+      border-left: 3px solid transparent;
+      font-size: 14px;
+      user-select: none;
+    }
+    .nav-item:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+    .nav-item.active {
+      color: var(--accent);
+      background: rgba(88,166,255,0.08);
+      border-left-color: var(--accent);
+      font-weight: 500;
+    }
+    .nav-item .count {
+      margin-left: auto;
+      background: var(--bg-tertiary);
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+    .nav-item.active .count {
+      background: rgba(88,166,255,0.15);
+      color: var(--accent);
+    }
+
+    /* ==================== 内容区域 ==================== */
+    .content-area { padding: 24px; overflow-y: auto; }
+
+    /* ==================== 卡片列表 ==================== */
+    .card-list { display: flex; flex-direction: column; gap: 12px; }
+    .card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      transition: all 0.2s;
+      position: relative;
+    }
+    .card:hover { border-color: var(--accent); box-shadow: var(--shadow); }
+    .card-info { flex: 1; min-width: 0; }
+    .card-title {
+      font-size: 15px; font-weight: 600;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .card-meta {
+      font-size: 13px; color: var(--text-secondary);
+      display: flex; gap: 14px; margin-top: 4px;
+    }
+    .card-badge {
+      font-size: 11px; padding: 2px 8px;
+      border-radius: 10px; font-weight: 600;
+    }
+    .badge-hot { background: var(--orange-bg); color: var(--orange); }
+    .badge-tag { background: rgba(139,148,158,0.15); color: var(--text-secondary); }
+    .card-actions { display: flex; gap: 8px; flex-shrink: 0; }
+
+    /* ==================== 空状态 ==================== */
+    .empty-state {
+      text-align: center; padding: 60px 20px;
+      color: var(--text-secondary);
+    }
+    .empty-state .icon { font-size: 48px; margin-bottom: 16px; opacity: 0.5; }
+    .empty-state p { font-size: 15px; margin-bottom: 20px; }
+
+    /* ==================== 模态框 ==================== */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      animation: fadeIn 0.2s ease;
+    }
+    .modal-overlay.show { display: flex; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    .modal {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      width: 90%; max-width: 640px;
+      max-height: 85vh;
+      overflow-y: auto;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.5);
+      animation: slideUp 0.25s ease;
+    }
+    @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+    .modal-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 20px 24px; border-bottom: 1px solid var(--border);
+    }
+    .modal-header h2 { font-size: 17px; font-weight: 600; }
+    .close-btn {
+      width: 32px; height: 32px; border-radius: 50%;
+      border: none; background: var(--bg-tertiary);
+      color: var(--text-secondary); cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; transition: all 0.15s;
+    }
+    .close-btn:hover { background: var(--red-bg); color: var(--red); }
+
+    .modal-body { padding: 24px; }
+
+    /* ==================== 表单 ==================== */
+    .form-group { margin-bottom: 18px; }
+    .form-group label {
+      display: block; font-size: 13px; font-weight: 600;
+      color: var(--text-secondary); margin-bottom: 6px;
+    }
+    .form-group label .required { color: var(--red); margin-left: 2px; }
+    .form-control {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      font-size: 14px;
+      font-family: inherit;
+      transition: border-color 0.2s;
+      outline: none;
+    }
+    .form-control:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(88,166,255,0.15); }
+    textarea.form-control { resize: vertical; min-height: 100px; }
+    select.form-control { cursor: pointer; appearance: auto; }
+    .checkbox-wrap {
+      display: flex; align-items: center; gap: 8px; cursor: pointer;
+    }
+    .checkbox-wrap input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--accent); }
+
+    .modal-footer {
+      display: flex; justify-content: flex-end; gap: 10px;
+      padding: 16px 24px; border-top: 1px solid var(--border);
+    }
+
+    /* ==================== 发布状态栏 ==================== */
+    .publish-bar {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: var(--bg-secondary);
+      border-top: 1px solid var(--border);
+      padding: 12px 24px;
+      display: flex; justify-content: space-between; align-items: center;
+      z-index: 150;
+      transform: translateY(100%);
+      transition: transform 0.3s;
+    }
+    .publish-bar.show { transform: translateY(0); }
+    .publish-msg { font-size: 14px; color: var(--text-secondary); }
+    .publish-msg.success { color: var(--green); }
+    .publish-msg.error { color: var(--red); }
+
+    /* ==================== Toast 通知 ==================== */
+    .toast-container {
+      position: fixed; top: 70px; right: 24px; z-index: 300;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .toast {
+      background: var(--bg-tertiary); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 12px 20px;
+      font-size: 14px; display: flex; align-items: center; gap: 10px;
+      box-shadow: var(--shadow); animation: toastIn 0.3s ease;
+      max-width: 380px;
+    }
+    .toast.success { border-color: rgba(63,185,80,0.4); }
+    .toast.error { border-color: rgba(248,81,73,0.4); }
+    .toast.info { border-color: rgba(88,166,255,0.4); }
+    @keyframes toastIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+    /* ==================== 确认对话框 ==================== */
+    .confirm-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+      display: none; align-items: center; justify-content: center; z-index: 250;
+    }
+    .confirm-overlay.show { display: flex; }
+    .confirm-box {
+      background: var(--bg-secondary); border: 1px solid var(--border);
+      border-radius: 12px; padding: 28px; text-align: center; max-width: 400px;
+    }
+    .confirm-box p { font-size: 15px; margin-bottom: 24px; line-height: 1.6; }
+    .confirm-actions { display: flex; justify-content: center; gap: 12px; }
+
+    /* ==================== 加载动画 ==================== */
+    .spinner {
+      display: inline-block; width: 20px; height: 20px;
+      border: 2px solid var(--border); border-top-color: var(--accent);
+      border-radius: 50%; animation: spin 0.6s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ==================== 响应式 ==================== */
+    @media (max-width: 768px) {
+      .main-layout { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .mobile-nav { display: flex; overflow-x: auto; gap: 4px; padding: 8px 16px;
+        background: var(--bg-secondary); border-bottom: 1px solid var(--border); }
+      .mobile-nav .nav-item { border-left: none; border-bottom: 2px solid transparent;
+        padding: 8px 14px; white-space: nowrap; }
+      .mobile-nav .nav-item.active { border-bottom-color: var(--accent); border-left-color: transparent;
+        background: none; }
+      .mobile-nav .nav-item .count { display: none; }
+    }
+    @media (min-width: 769px) { .mobile-nav { display: none !important; } }
+
+    /* ==================== 预览链接区 ==================== */
+    .preview-links {
+      display: flex; gap: 12px; align-items: center;
+      font-size: 13px; color: var(--text-secondary);
+    }
+    .preview-links a { color: var(--accent); text-decoration: none; }
+    .preview-links a:hover { text-decoration: underline; }
+
+    /* Markdown 编辑器增强 */
+    .editor-hint {
+      font-size: 12px; color: var(--text-secondary);
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ========== 顶部导航栏 ========== -->
+<div class="topbar">
+  <h1>🖥 <span>博客管理后台</span></h1>
+  <div class="topbar-actions">
+    <div class="preview-links">
+      <a href="https://astorian-j.github.io/blog/" target="_blank" title="打开前台">🌐 前台预览</a>
+      <span style="color:var(--border)">|</span>
+      <span style="display:flex;align-items:center;gap:6px;">
+        <div class="status-dot"></div> 服务运行中
+      </span>
+    </div>
+    <button class="btn btn-primary btn-lg" onclick="showPublish()" id="publishBtn">
+      🚀 一键发布
+    </button>
+  </div>
+</div>
+
+<!-- ========== 移动端导航 ========== -->
+<div class="mobile-nav" id="mobileNav"></div>
+
+<!-- ========== 主布局 ========== -->
+<div class="main-layout">
+
+  <!-- 侧边栏 -->
+  <aside class="sidebar" id="sidebar">
+    <!-- 由 JS 动态生成 -->
+  </aside>
+
+  <!-- 内容区域 -->
+  <main class="content-area" id="contentArea">
+    <div class="empty-state">
+      <div class="icon">📂</div>
+      <p>选择左侧分类查看内容</p>
+      <button class="btn btn-primary" onclick="loadCollection('news')">📰 查看最新短讯</button>
+    </div>
+  </main>
+
+</div>
+
+<!-- ========== 新增/编辑模态框 ========== -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="editModalTitle">新增内容</h2>
+      <button class="close-btn" onclick="closeEditModal()">✕</button>
+    </div>
+    <div class="modal-body" id="editFormBody">
+      <!-- 动态表单 -->
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeEditModal()">取消</button>
+      <button class="btn btn-primary" onclick="saveItem()" id="saveBtn">💾 保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 确认删除对话框 ========== -->
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <p id="confirmText">确定要删除这条内容吗？<br><small>此操作不可撤销</small></p>
+    <div class="confirm-actions">
+      <button class="btn" onclick="closeConfirm()">取消</button>
+      <button class="btn btn-danger" id="confirmOkBtn">🗑 删除</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 发布状态栏 ========== -->
+<div class="publish-bar" id="publishBar">
+  <div class="publish-msg" id="publishMsg">准备发布...</div>
+  <button class="btn btn-sm" onclick="hidePublishBar()" style="color:var(--text-secondary)">收起</button>
+</div>
+
+<!-- ========== Toast 容器 ========== -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+// ==================== 全局状态 ====================
+const API = ''; // 同源请求
+let currentCollection = '';
+let currentData = {};
+let editingPath = null;
+
+// ==================== 初始化 ====================
+async function init() {
+  await loadCollections();
+  
+  // URL hash 路由支持
+  const hash = location.hash.slice(1);
+  if (hash && COLLECTION_KEYS.includes(hash)) {
+    loadCollection(hash);
+  } else {
+    loadCollection('news');
+  }
+}
+
+// 分类键名（从后端获取后覆盖）
+let COLLECTION_CONFIG = {};
+
+const COLLECTION_KEYS = ['news', 'articles', 'survey-data', 'videos', 'history'];
+
+// ==================== 加载分类列表 ====================
+async function loadCollections() {
+  try {
+    const res = await fetch(API + '/api/collections');
+    const data = await res.json();
+    COLLECTION_CONFIG = data.collections || {};
+    renderSidebar();
+  } catch(e) {
+    console.warn('加载分类失败，使用默认配置');
+    COLLECTION_CONFIG = {
+      news: '📰 最新平衡资讯',
+      articles: '📝 文章发布',
+      'survey-data': '📊 每月问卷数据',
+      videos: '▶️ 平衡推荐视频',
+      history: '📋 历次平衡改动',
+    };
+    renderSidebar();
+  }
+}
+
+// ==================== 渲染侧边栏 ====================
+function renderSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const mobileNav = document.getElementById('mobileNav');
+  let html = '';
+  for (const [key, label] of Object.entries(COLLECTION_CONFIG)) {
+    html += `<div class="nav-item" data-col="${key}" onclick="loadCollection('${key}')">
+      <span>${label}</span>
+      <span class="count" id="count-${key}">-</span>
+    </div>`;
+  }
+  sidebar.innerHTML = html;
+  mobileNav.innerHTML = html.replace('nav-item', 'nav-item mobile');
+}
+
+// ==================== 加载某分类的内容列表 ====================
+async function loadCollection(colName) {
+  currentCollection = colName;
+  editingPath = null;
+  
+  // 更新激活状态
+  document.querySelectorAll('.nav-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.col === colName);
+  });
+  location.hash = colName;
+  
+  const contentArea = document.getElementById('contentArea');
+  contentArea.innerHTML = '<div class="empty-state"><div class="spinner"></div><p style="margin-top:12px;">加载中...</p></div>';
+  
+  try {
+    const res = await fetch(API + `/api/${colName}/files`);
+    const data = await res.json();
+    const items = data[colName] || [];
+    
+    // 更新计数
+    const countEl = document.getElementById(`count-${colName}`);
+    if (countEl) countEl.textContent = items.length;
+    
+    if (items.length === 0) {
+      contentArea.innerHTML = `
+        <div class="empty-state">
+          <div class="icon">📭</div>
+          <p>暂无内容</p>
+          <button class="btn btn-primary" onclick="showAddModal('${colName}')">➕ 添加${COLLECTION_CONFIG[colName] || ''}</button>
+        </div>`;
+      return;
+    }
+    
+    let cardsHtml = `
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <h2 style="font-size:18px;font-weight:600;">${COLLECTION_CONFIG[colName] || colName}</h2>
+        <button class="btn btn-sm btn-primary" onclick="showAddModal('${colName}')">➕ 添加</button>
+      </div>
+      <div class="card-list">`;
+    
+    for (const item of items) {
+      const fm = item.frontmatter || {};
+      const title = fm.title || item.filename.replace('.md', '');
+      const date = fm.date || item.modified || '';
+      const isHot = fm.hot === true || fm.hot === 'true';
+      
+      let badgesHtml = '';
+      if (isHot) badgesHtml += '<span class="card-badge badge-hot">HOT</span>';
+      if (fm.tag) badgesHtml += `<span class="card-badge badge-tag">${fm.tag}</span>`;
+      
+      cardsHtml += `
+        <div class="card" data-path="${item.path}">
+          <div class="card-info">
+            <div class="card-title">${badgesHtml} ${escapeHtml(title)}</div>
+            <div class="card-meta">
+              <span>📅 ${date.split(' ')[0]}</span>
+              ${fm.year ? `<span>📆 ${fm.year}-${String(fm.month||'').padStart(2,'0')}</span>` : ''}
+              ${fm.buffed !== undefined ? `<span style="color:var(--green)">↑${fm.buffed}</span>` : ''}
+              ${fm.nerfed !== undefined ? `<span style="color:var(--red)">↓${fm.nerfed}</span>` : ''}
+              <span>📝 ${item.modified}</span>
+            </div>
+          </div>
+          <div class="card-actions">
+            <button class="btn btn-sm" onclick="showEditModal('${colName}', '${item.path}')">✏️ 编辑</button>
+            <button class="btn btn-sm btn-danger" onclick="confirmDelete('${item.path}', '${escapeJs(title)}')">🗑</button>
+          </div>
+        </div>`;
+    }
+    
+    cardsHtml += '</div>';
+    contentArea.innerHTML = cardsHtml;
+    
+  } catch(err) {
+    contentArea.innerHTML = `<div class="empty-state"><div class="icon" style="color:var(--red)">⚠️</div>
+      <p>加载失败：${err.message}</p><button class="btn" onclick="loadCollection('${colName}')">重试</button></div>`;
+  }
+}
+
+// ==================== 新增模态框 ====================
+function showAddModal(colName) {
+  editingPath = null;
+  document.getElementById('editModalTitle').textContent = `➕ 新增 ${COLLECTION_CONFIG[colName] || colName}`;
+  renderEditForm(colName, {});
+  document.getElementById('editModal').classList.add('show');
+}
+
+// ==================== 编辑模态框 ====================
+async function showEditModal(colName, filePath) {
+  editingPath = filePath;
+  document.getElementById('editModalTitle').textContent = `✏️ 编辑内容`;
+  document.getElementById('editModal').classList.add('show');
+  
+  // 显示加载中
+  document.getElementById('editFormBody').innerHTML = '<div class="empty-state"><div class="spinner"></div></div>';
+  
+  try {
+    const res = await fetch(`${API}/api/file/${encodeURIComponent(filePath)}`);
+    const data = await res.json();
+    currentData = data.frontmatter || {};
+    currentData._body = data.body || '';
+    renderEditForm(colName, currentData);
+  } catch(err) {
+    document.getElementById('editFormBody').innerHTML = `<p style="color:var(--red);padding:20px;">加载失败：${err.message}</p>`;
+  }
+}
+
+// ==================== 渲染编辑表单 ====================
+async function renderEditForm(colName, values) {
+  // 获取字段定义
+  try {
+    const res = await fetch(`${API}/api/${colName}/fields`);
+    const fields = await res.json();
+    const fieldList = fields.fields || [];
+    
+    let formHtml = '';
+    for (const field of fieldList) {
+      const val = values[field.name] ?? (field.type === 'checkbox' ? false : '');
+      const required = field.required ? '<span class="required">*</span>' : '';
+      
+      if (field.type === 'checkbox') {
+        formHtml += `<div class="form-group"><label class="checkbox-wrap">
+          <input type="checkbox" id="f_${field.name}" ${val ? 'checked' : ''}>
+          ${field.label}${required}
+        </label></div>`;
+      } else if (field.type === 'select') {
+        const opts = (field.options || []).map(o =>
+          `<option value="${o}" ${val === o ? 'selected' : ''}>${o}</option>`
+        ).join('');
+        formHtml += `<div class="form-group"><label>${field.label}${required}</label>
+          <select class="form-control" id="f_${field.name}">${opts}</select></div>`;
+      } else if (field.type === 'textarea' || field.type === 'markdown') {
+        const hint = field.hint ? `<div class="editor-hint">${field.hint}</div>` : '';
+        formHtml += `<div class="form-group"><label>${field.label}${required}</label>
+          <textarea class="form-control" id="f_${field.name}" rows="${field.type==='markdown'?8:3}"
+          placeholder="${field.hint || ''}">${escapeHtml(val)}</textarea>${hint}</div>`;
+      } else {
+        const hint = field.hint ? `<div class="editor-hint">${field.hint}</div>` : '';
+        formHtml += `<div class="form-group"><label>${field.label}${required}</label>
+          <input class="form-control" type="${field.type || 'text'}" id="f_${field.name}"
+          value="${escapeHtml(String(val))}" placeholder="${field.hint || ''}">${hint}</div>`;
+      }
+    }
+    
+    document.getElementById('editFormBody').innerHTML = formHtml;
+    
+  } catch(err) {
+    document.getElementById('editFormBody').innerHTML = `<p style="color:var(--red);padding:20px;">加载表单失败：${err.message}</p>`;
+  }
+}
+
+// ==================== 收集表单数据 ====================
+function collectFormData(fieldsDef) {
+  const data = {};
+  for (const field of fieldsDef) {
+    const el = document.getElementById(`f_${field.name}`);
+    if (!el) continue;
+    if (field.type === 'checkbox') {
+      data[field.name] = el.checked;
+    } else if (field.type === 'number') {
+      const n = parseInt(el.value);
+      data[field.name] = isNaN(n) ? null : n;
+    } else {
+      data[field.name] = el.value.trim() || null;
+    }
+  }
+  return data;
+}
+
+// ==================== 保存内容（新增或编辑） ====================
+async function saveItem() {
+  const btn = document.getElementById('saveBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> 保存中...';
+  
+  try {
+    const fieldsRes = await fetch(`${API}/api/${currentCollection}/fields`);
+    const fieldsDef = (await fieldsRes.json()).fields || [];
+    const data = collectFormData(fieldsDef);
+    
+    data.collection = currentCollection;
+    data.body = document.getElementById('f_body')?.value || currentData._body || '';
+    
+    if (editingPath) {
+      // 编辑模式
+      data.path = editingPath;
+      data.filename = editingPath.split('/').pop();
+      const res = await fetch(API + '/api/edit', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+      });
+      const result = await res.json();
+      showToast(result.success ? 'success' : 'error', result.message || (result.success ? '✅ 更新成功！' : '❌ 更新失败'));
+    } else {
+      // 新增模式
+      if (!data.title) { showToast('error', '❌ 请填写标题'); return; }
+      const res = await fetch(API + '/api/add', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+      });
+      const result = await res.json();
+      showToast(result.success ? 'success' : 'error', result.message || (result.success ? '✅ 创建成功！' : '❌ 创建失败'));
+    }
+    
+    closeEditModal();
+    loadCollection(currentCollection);
+    
+  } catch(err) {
+    showToast('error', '❌ 操作失败：' + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '💾 保存';
+  }
+}
+
+// ==================== 关闭编辑模态框 ====================
+function closeEditModal() {
+  document.getElementById('editModal').classList.remove('show');
+  currentData = {};
+  editingPath = null;
+}
+
+// ==================== 确认删除 ====================
+function confirmDelete(path, name) {
+  document.getElementById('confirmText').innerHTML = 
+    `确定要删除「<b>${name}</b>」吗？<br><small style="color:var(--text-secondary)">此操作无法撤销</small>`;
+  document.getElementById('confirmOverlay').classList.add('show');
+  document.getElementById('confirmOkBtn').onclick = () => doDelete(path);
+}
+
+function closeConfirm() {
+  document.getElementById('confirmOverlay').classList.remove('show');
+}
+
+async function doDelete(path) {
+  closeConfirm();
+  try {
+    const res = await fetch(API + '/api/delete', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ path })
+    });
+    const result = await res.json();
+    showToast(result.success ? 'success' : 'error', result.message || (result.success ? '🗑 已删除！' : '❌ 删除失败'));
+    loadCollection(currentCollection);
+  } catch(err) {
+    showToast('error', '❌ 删除失败：' + err.message);
+  }
+}
+
+// ==================== 一键发布 ====================
+function showPublish() {
+  const bar = document.getElementById('publishBar');
+  bar.classList.add('show');
+  doPublish();
+}
+
+function hidePublishBar() {
+  document.getElementById('publishBar').classList.remove('show');
+}
+
+async function doPublish() {
+  const msgEl = document.getElementById('publishMsg');
+  const btn = document.getElementById('publishBtn');
+  msgEl.textContent = '正在更新 manifest 并推送到 GitHub...';
+  msgEl.className = 'publish-msg';
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> 发布中...';
+  
+  try {
+    const res = await fetch(API + '/api/publish', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ message: '通过管理后台发布' })
+    });
+    const result = await res.json();
+    
+    if (result.success) {
+      msgEl.textContent = result.message || '✅ 发布成功！';
+      msgEl.className = 'publish-msg success';
+      showToast('success', '🚀 ' + (result.message || '已成功推送到 GitHub！'));
+    } else {
+      msgEl.textContent = result.message || '❌ 发布失败';
+      msgEl.className = 'publish-msg error';
+      showToast('error', '❌ ' + (result.message || '发布失败'));
+    }
+  } catch(err) {
+    msgEl.textContent = '❌ 网络错误：' + err.message;
+    msgEl.className = 'publish-msg error';
+    showToast('error', '❌ 网络错误：' + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '🚀 一键发布';
+  }
+}
+
+// ==================== Toast 通知 ====================
+function showToast(type, message) {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  const icons = { success: '✅', error: '❌', info: 'ℹ️' };
+  toast.innerHTML = `${icons[type] || ''} ${message}`;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(100%)';
+    toast.style.transition = 'all 0.3s';
+    setTimeout(() => toast.remove(), 300);
+  }, 3500);
+}
+
+// ==================== 工具函数 ====================
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+function escapeJs(str) {
+  return str.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"');
+}
+
+// ==================== 启动 ====================
+init();
+
+// ESC 关闭模态框
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    closeEditModal();
+    closeConfirm();
+  }
+});
+// 点击遮罩关闭模态框
+document.getElementById('editModal').addEventListener('click', e => {
+  if (e.target.id === 'editModal') closeEditModal();
+});
+document.getElementById('confirmOverlay').addEventListener('click', e => {
+  if (e.target.id === 'confirmOverlay') closeConfirm();
+});
+</script>
+
+</body>
+</html>

@@ -1,19 +1,9 @@
 ---
-title: "如何参与每月社区平衡投票？完整指南"
+title: 如何参与每月社区平衡投票？完整指南
 date: 2026-04-15
 tag: 教程
-excerpt: "详细介绍中国社区平衡投票流程：投票时间窗口、评分规则说明、数据统计方法以及结果公示机制..."
+excerpt: 详细介绍中国社区平衡投票流程：投票时间窗口、评分规则说明、数据统计方法以及结果公示机制...
+body: "如果有不熟悉问卷操作的，可以观看本视频学习一下使用方法：https://www.bilibili.com/video/BV1dHFmzCEUr/?share_source=copy_web&vd_source=fc2dec28ac57be4ec2dd9f8c0b2d5f9c"
 ---
-## 投票参与方式
 
-### 1. 投票时间
-每月1日开启，月底截止。
-
-### 2. 评分规则
-每张卡牌可评 1-3 星，对应权重分：
-- ⭐ 一星 = 1分（建议加强）
-- ⭐⭐ 二星 = 2分（保持现状）
-- ⭐⭐⭐ 三星 = 3分（建议削弱）
-
-### 3. 数据统计
-投票结束后自动汇总，生成完整的卡牌权重排行。
+如果有不熟悉问卷操作的，可以观看本视频学习一下使用方法：https://www.bilibili.com/video/BV1dHFmzCEUr/?share_source=copy_web&vd_source=fc2dec28ac57be4ec2dd9f8c0b2d5f9c
