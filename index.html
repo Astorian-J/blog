@@ -585,7 +585,7 @@
                     const text = await res.text();
                     const { frontmatter: fm } = parseFrontmatter(text);
                     html += `
-                        <div class="news-card">
+                        <div class="news-card" style="cursor:pointer;" onclick="openNewsModal('${f}')">
                             <div class="news-card-header">
                                 ${fm.hot ? `<span class="news-tag">${i18n[currentLang].tag_hot}</span>` : ''}
                                 <span class="news-date">${fm.date || ''}</span>
@@ -727,6 +727,22 @@
                 .replace(/\n\n/g, '</p><p>')
                 .replace(/\n/g, '<br>');
             return '<p>' + html + '</p>';
+        }
+
+        async function openNewsModal(file) {
+            try {
+                const res = await fetch(file);
+                if (!res.ok) return;
+                const text = await res.text();
+                const data = parseFrontmatter(text);
+                document.getElementById('modalTitle').textContent = data.frontmatter.title || '';
+                document.getElementById('modalMeta').innerHTML =
+                    `${data.frontmatter.hot ? `<span class="tag highlight">${i18n[currentLang].tag_hot}</span>` : ''}` +
+                    ` &nbsp; ${data.frontmatter.date || ''}`;
+                document.getElementById('modalBody').innerHTML = renderMd(data.body || data.frontmatter.excerpt || '');
+                document.getElementById('articleModal').classList.add('active');
+                document.body.style.overflow = 'hidden';
+            } catch(e) { console.warn('Failed to open news:', e); }
         }
 
         async function openArticleModal(file) {
