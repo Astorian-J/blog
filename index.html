@@ -621,11 +621,11 @@
                 }
             }
 
-            // 初始化分页状态
+            // 初始化分页状态 — 用 manifest 总数，不用加载成功数
             if (!pageState.articles) {
-                pageState.articles = { page: 1, total: _articlesData.length, renderFn: renderArticles };
+                pageState.articles = { page: 1, total: files.length, renderFn: renderArticles };
             }
-            pageState.articles.total = _articlesData.length;
+            pageState.articles.total = files.length;
 
             const ps = PAGE_SIZE.articles;
             const start = (pageState.articles.page - 1) * ps;
@@ -670,9 +670,9 @@
             }
 
             if (!pageState['survey-data']) {
-                pageState['survey-data'] = { page: 1, total: _surveyData.length, renderFn: renderSurveyData };
+                pageState['survey-data'] = { page: 1, total: files.length, renderFn: renderSurveyData };
             }
-            pageState['survey-data'].total = _surveyData.length;
+            pageState['survey-data'].total = files.length;
 
             const ps = PAGE_SIZE['survey-data'];
             const start = (pageState['survey-data'].page - 1) * ps;
@@ -724,9 +724,9 @@
             }
 
             if (!pageState.videos) {
-                pageState.videos = { page: 1, total: _videoData.length, renderFn: renderVideos };
+                pageState.videos = { page: 1, total: files.length, renderFn: renderVideos };
             }
-            pageState.videos.total = _videoData.length;
+            pageState.videos.total = files.length;
 
             const ps = PAGE_SIZE.videos;
             const start = (pageState.videos.page - 1) * ps;
@@ -771,9 +771,9 @@
             }
 
             if (!pageState.history) {
-                pageState.history = { page: 1, total: _historyData.length, renderFn: renderHistory };
+                pageState.history = { page: 1, total: files.length, renderFn: renderHistory };
             }
-            pageState.history.total = _historyData.length;
+            pageState.history.total = files.length;
 
             const ps = PAGE_SIZE.history;
             const start = (pageState.history.page - 1) * ps;
