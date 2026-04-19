@@ -71,21 +71,27 @@
         }
         .lang-switch span.active { background: var(--card-bg); color: var(--text-primary); box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
 
-        .nav-links { display: flex; gap: 26px; list-style: none; }
+        .nav-links { display: flex; gap: 4px; list-style: none; }
         .nav-links a {
             font-size: 14px; font-weight: 500; color: var(--text-secondary);
-            transition: color 0.2s; position: relative; white-space: nowrap;
+            transition: all 0.2s; position: relative; white-space: nowrap;
+            padding: 6px 16px; border-radius: 8px;
         }
-        .nav-links a:hover { color: var(--accent); }
-        .nav-links a.active { color: var(--accent); }
-        .nav-links a.active::after {
-            content: ''; position: absolute; bottom: -4px; left: 0; right: 0;
-            height: 2px; background: var(--accent); border-radius: 1px;
-        }
+        .nav-links a:hover { color: var(--accent); background: rgba(37,99,235,0.05); }
+        .nav-links a.active { color: #fff; background: var(--accent); }
+        .nav-links a.active::after { display: none; }
         .menu-toggle { display: none; background: none; border: none; cursor: pointer; font-size: 24px; color: var(--text-primary); }
 
         /* ===== 主内容区 ===== */
-        .main-content { max-width: 820px; margin: 0 auto; padding: 90px 24px 60px; }
+        .main-content { max-width: 880px; margin: 0 auto; padding: 90px 24px 60px; }
+
+        /* ===== Tab 面板（标签页切换）===== */
+        .tab-panel { display: none; animation: tabFadeIn 0.3s ease-out; }
+        .tab-panel.active { display: block; }
+        @keyframes tabFadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
         /* ===== Hero 区域 ===== */
         .hero {
@@ -332,11 +338,11 @@
     <nav class="navbar">
         <div class="logo" data-i18n="logo">昆<span>特</span></div>
         <ul class="nav-links" id="navLinks">
-            <li><a href="#news" class="active" data-i18n="nav_news">最新资讯</a></li>
-            <li><a href="#articles" data-i18n="nav_articles">文章发布</a></li>
-            <li><a href="#survey-data" data-i18n="nav_data">问卷数据</a></li>
-            <li><a href="#videos" data-i18n="nav_videos">平衡视频</a></li>
-            <li><a href="#history" data-i18n="nav_history">历次改动</a></li>
+            <li><a href="javascript:;" data-tab="news" class="active" data-i18n="nav_news">最新资讯</a></li>
+            <li><a href="javascript:;" data-tab="articles" data-i18n="nav_articles">文章发布</a></li>
+            <li><a href="javascript:;" data-tab="survey-data" data-i18n="nav_data">问卷数据</a></li>
+            <li><a href="javascript:;" data-tab="videos" data-i18n="nav_videos">平衡视频</a></li>
+            <li><a href="javascript:;" data-tab="history" data-i18n="nav_history">历次改动</a></li>
         </ul>
         <div style="display:flex;align-items:center;gap:16px;">
             <div class="lang-switch" id="langSwitch" onclick="toggleLang()">
@@ -347,14 +353,15 @@
         </div>
     </nav>
 
-    <!-- 主内容 -->
+        <!-- 主内容 -->
     <main class="main-content">
 
+        <!-- 首页（含Hero + 最新资讯） -->
+        <div class="tab-panel active" id="panel-news">
         <!-- Hero -->
         <section class="hero">
             <h1 data-i18n="hero_title">中国社区昆特平衡数据库</h1>
             <p data-i18n="hero_desc">记录每一次社区平衡投票，用数据见证昆特环境的变迁</p>
-
         </section>
 
         <!-- 板块一：最新平衡资讯 — 2×2矩阵 -->
@@ -368,9 +375,11 @@
                 <!-- JS动态渲染 -->
             </div>
         </section>
+        </div>
 
         <!-- 板块二：文章发布 -->
-        <section class="section" id="articles">
+        <div class="tab-panel" id="panel-articles">
+        <section class="section" id="articles" style="margin-top:20px;">
             <div class="section-header">
                 <div class="section-icon"></div>
                 <h2 class="section-title" data-i18n="sec_articles">文章发布</h2>
@@ -383,9 +392,11 @@
                 <!-- JS动态显示分页 -->
             </div>
         </section>
+        </div>
 
         <!-- 板块三：每月问卷数据 -->
-        <section class="section" id="survey-data">
+        <div class="tab-panel" id="panel-survey-data">
+        <section class="section" id="survey-data" style="margin-top:20px;">
             <div class="section-header">
                 <div class="section-icon"></div>
                 <h2 class="section-title" data-i18n="sec_data">每月问卷数据</h2>
@@ -396,9 +407,11 @@
             </div>
             <div class="pagination" style="display:none;" id="dataPagination"></div>
         </section>
+        </div>
 
         <!-- 板块四：每月平衡推荐视频 -->
-        <section class="section" id="videos">
+        <div class="tab-panel" id="panel-videos">
+        <section class="section" id="videos" style="margin-top:20px;">
             <div class="section-header">
                 <div class="section-icon"></div>
                 <h2 class="section-title" data-i18n="sec_videos">每月平衡推荐视频</h2>
@@ -409,9 +422,11 @@
             </div>
             <div class="pagination" style="display:none;" id="videoPagination"></div>
         </section>
+        </div>
 
         <!-- 板块五：历次平衡改动 -->
-        <section class="section" id="history">
+        <div class="tab-panel" id="panel-history">
+        <section class="section" id="history" style="margin-top:20px;">
             <div class="section-header">
                 <div class="section-icon"></div>
                 <h2 class="section-title" data-i18n="sec_history">历次平衡改动</h2>
@@ -422,6 +437,7 @@
             </div>
             <div class="pagination" style="display:none;" id="historyPagination"></div>
         </section>
+        </div>
 
     <!-- 文章详情弹窗 -->
     <div class="modal-overlay" id="articleModal" onclick="if(event.target===this)closeModal()">
@@ -518,18 +534,44 @@
             document.getElementById('navLinks').classList.toggle('open');
         }
 
+        // ===== 标签页切换 =====
+        let currentTab = 'news';
+
+        function switchTab(tabId) {
+            if (tabId === currentTab) return;
+            currentTab = tabId;
+
+            // 切换面板
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+            const targetPanel = document.getElementById('panel-' + tabId);
+            if (targetPanel) targetPanel.classList.add('active');
+
+            // 更新导航高亮
+            document.querySelectorAll('.nav-links a').forEach(link => {
+                link.classList.toggle('active', link.getAttribute('data-tab') === tabId);
+            });
+
+            // 滚回顶部
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            // 触发对应板块的数据渲染（确保首次切换时加载数据）
+            if (tabId === 'articles' && _articlesData.length === 0) renderArticles();
+            else if (tabId === 'survey-data' && _surveyData.length === 0) renderSurveyData();
+            else if (tabId === 'videos' && _videoData.length === 0) renderVideos();
+            else if (tabId === 'history' && _historyData.length === 0) renderHistory();
+        }
+
+        // 导航链接点击 → 标签切换
+        document.querySelectorAll('.nav-links a[data-tab]').forEach(link => {
+            link.addEventListener('click', e => {
+                e.preventDefault();
+                switchTab(link.getAttribute('data-tab'));
+            });
+        });
+
         window.addEventListener('scroll', () => {
             const btn = document.getElementById('backToTop');
             if (window.scrollY > 400) btn.classList.add('show'); else btn.classList.remove('show');
-
-            const sections = document.querySelectorAll('.section[id]');
-            const navLinks = document.querySelectorAll('.nav-links a');
-            let current = '';
-            sections.forEach(sec => { if (window.scrollY >= sec.offsetTop - 90) current = sec.getAttribute('id'); });
-            navLinks.forEach(link => {
-                link.classList.remove('active');
-                if (link.getAttribute('href') === '#' + current) link.classList.add('active');
-            });
         });
 
         // ===== 内容渲染引擎 =====
@@ -798,10 +840,10 @@
 
         // ===== 通用分页工具 =====
         const PAGE_SIZE = {
-            articles: 5,
-            'survey-data': 6,
-            videos: 6,
-            history: 8
+            articles: 8,
+            'survey-data': 9,
+            videos: 9,
+            history: 12
         };
         const pageState = {}; // { section: { page: N, items: [], renderFn: func } }
 
