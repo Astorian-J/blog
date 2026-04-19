@@ -742,9 +742,6 @@
             let html = '';
             for (const item of pageItems) {
                 const { f, fm } = item;
-                const imgHtml = fm.chart_image
-                    ? `<img src="${fm.chart_image}" alt="${fm.title}" loading="lazy">`
-                    : '<span>&#128202; 数据预览图</span>';
                 const rawBtn = fm.raw_url && fm.raw_url !== '#'
                     ? `<button class="btn-sm" onclick="window.open('${fm.raw_url}','_blank')">${i18n[currentLang].btn_raw}</button>`
                     : '';
@@ -756,12 +753,11 @@
                     : '';
                 html += `
                     <div class="data-card">
-                        <div class="data-card-img">${imgHtml}</div>
                         <div class="data-card-body">
                             <div class="data-card-title">${fm.title || ''}</div>
                             <div class="data-card-desc">${fm.vote_count ? `${fm.vote_count} 人次` : ''}</div>
                             <div class="data-card-actions">
-                                <button class="btn-sm primary">${i18n[currentLang].btn_view_img}</button>${rawBtn}${statBtn}${videoBtn}
+                                ${rawBtn}${statBtn}${videoBtn}
                             </div>
                         </div>
                     </div>`;
