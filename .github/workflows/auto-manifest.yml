@@ -56,8 +56,11 @@ print('manifest.json generated OK')
       - name: Check for changes
         id: check_changes
         run: |
-          git diff --exit-code content/manifest.json || echo "changed=true" >> $GITHUB_OUTPUT
-          echo "changed=false" >> $GITHUB_OUTPUT
+          if git diff --exit-code content/manifest.json; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
 
       - name: Commit and push updated manifest
         if: steps.check_changes.outputs.changed == 'true'
