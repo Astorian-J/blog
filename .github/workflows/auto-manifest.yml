@@ -40,7 +40,7 @@ jobs:
               if os.path.isdir(d):
                   for f in sorted(os.listdir(d), reverse=True):
                       if f.endswith('.md'):
-                          files.append(f"{col}/{f}")
+                          files.append(f"content/{col}/{f}")
               manifest[col] = files
 
           with open("content/manifest.json", "w", encoding="utf-8") as fp:
