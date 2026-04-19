@@ -1,30 +1,30 @@
 {
   "news": [
-    "news/2026-04-17-2026年4月赛季昆特平衡玩家意愿问卷调查正式开始！.md"
+    "content/news/2026-04-17-2026年4月赛季昆特平衡玩家意愿问卷调查正式开始！.md"
   ],
   "articles": [
-    "articles/2026-04-19-1.md",
-    "articles/2026-04-15-voting-guide.md"
+    "content/articles/2026-04-19-111.md",
+    "content/articles/2026-04-15-voting-guide.md"
   ],
   "survey-data": [
-    "survey-data/2026-04.md",
-    "survey-data/2026-03.md",
-    "survey-data/2026-02.md"
+    "content/survey-data/2026-04.md",
+    "content/survey-data/2026-03.md",
+    "content/survey-data/2026-02.md"
   ],
   "videos": [
-    "videos/2026-04.md",
-    "videos/2026-03.md",
-    "videos/2026-02.md",
-    "videos/2026-01.md"
+    "content/videos/2026-04.md",
+    "content/videos/2026-03.md",
+    "content/videos/2026-02.md",
+    "content/videos/2026-01.md"
   ],
   "history": [
-    "history/2026-04.md",
-    "history/2026-03.md",
-    "history/2026-02.md",
-    "history/2026-01.md",
-    "history/2025-12.md",
-    "history/2025-11.md",
-    "history/2025-10.md",
-    "history/2025-09.md"
+    "content/history/2026-04.md",
+    "content/history/2026-03.md",
+    "content/history/2026-02.md",
+    "content/history/2026-01.md",
+    "content/history/2025-12.md",
+    "content/history/2025-11.md",
+    "content/history/2025-10.md",
+    "content/history/2025-09.md"
   ]
 }

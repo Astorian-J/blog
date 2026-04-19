@@ -251,6 +251,15 @@ def git_push(commit_msg="update content"):
         if not status.stdout.strip():
             return {"success": True, "message": "没有变更需要提交"}
         
+        # 先拉取远程最新（rebase 模式避免合并提交）
+        subprocess.run(
+            [GIT_EXE, "pull", "--rebase"],
+            cwd=str(BLOG_DIR),
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+        
         # git commit
         now = datetime.now().strftime("%Y-%m-%d %H:%M")
         msg = f"cms: {commit_msg} ({now})"

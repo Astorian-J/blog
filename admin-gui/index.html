@@ -651,6 +651,9 @@ async function saveItem() {
     data.collection = currentCollection;
     data.body = document.getElementById('f_body')?.value || currentData._body || '';
     
+    // 调试：打印发送的数据
+    console.log('[保存] 发送数据:', JSON.stringify(data));
+    
     if (editingPath) {
       // 编辑模式
       data.path = editingPath;
@@ -661,17 +664,19 @@ async function saveItem() {
         body: JSON.stringify(data)
       });
       const result = await res.json();
-      showToast(result.success ? 'success' : 'error', result.message || (result.success ? '✅ 更新成功！' : '❌ 更新失败'));
+      console.log('[保存] 编辑响应:', result);
+      showToast(result.success ? 'success' : 'error', result.message || result.error || (result.success ? '✅ 更新成功！' : '❌ 更新失败'));
     } else {
       // 新增模式
-      if (!data.title) { showToast('error', '❌ 请填写标题'); return; }
+      if (!data.title) { showToast('error', '❌ 请填写标题（标题是必填项）'); return; }
       const res = await fetch(API + '/api/add', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(data)
       });
       const result = await res.json();
-      showToast(result.success ? 'success' : 'error', result.message || (result.success ? '✅ 创建成功！' : '❌ 创建失败'));
+      console.log('[保存] 新增响应:', result);
+      showToast(result.success ? 'success' : 'error', result.message || result.error || (result.success ? '✅ 创建成功！' : '❌ 创建失败'));
     }
     
     closeEditModal();
