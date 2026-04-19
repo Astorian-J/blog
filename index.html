@@ -394,6 +394,7 @@
             <div class="data-grid" id="dataGrid">
                 <!-- JS动态渲染 -->
             </div>
+            <div class="pagination" style="display:none;" id="dataPagination"></div>
         </section>
 
         <!-- 板块四：每月平衡推荐视频 -->
@@ -406,6 +407,7 @@
             <div class="video-list" id="videoList">
                 <!-- JS动态渲染 -->
             </div>
+            <div class="pagination" style="display:none;" id="videoPagination"></div>
         </section>
 
         <!-- 板块五：历次平衡改动 -->
@@ -418,6 +420,7 @@
             <div class="history-list" id="historyList">
                 <!-- JS动态渲染 -->
             </div>
+            <div class="pagination" style="display:none;" id="historyPagination"></div>
         </section>
 
     <!-- 文章详情弹窗 -->
@@ -597,114 +600,255 @@
             if (html) container.innerHTML = html;
         }
 
-        // ========== 文章发布 ==========
+        // ========== 文章发布（分页） ==========
+        let _articlesData = []; // 缓存所有文章数据
+
         async function renderArticles() {
             const container = document.getElementById('articleList');
             const files = contentManifest.articles || [];
+
+            // 首次加载：获取所有数据
+            if (_articlesData.length !== files.length) {
+                _articlesData = [];
+                for (const f of files) {
+                    try {
+                        const res = await fetch(f);
+                        if (!res.ok) continue;
+                        const text = await res.text();
+                        const { frontmatter: fm, body } = parseFrontmatter(text);
+                        _articlesData.push({ file: f, fm, body });
+                    } catch(e) { /* skip */ }
+                }
+            }
+
+            // 初始化分页状态
+            if (!pageState.articles) {
+                pageState.articles = { page: 1, total: _articlesData.length, renderFn: renderArticles };
+            }
+            pageState.articles.total = _articlesData.length;
+
+            const ps = PAGE_SIZE.articles;
+            const start = (pageState.articles.page - 1) * ps;
+            const pageItems = _articlesData.slice(start, start + ps);
+
             let html = '';
-            for (const f of files) {
-                try {
-                    const res = await fetch(f);
-                    if (!res.ok) continue;
-                    const text = await res.text();
-                    const { frontmatter: fm, body } = parseFrontmatter(text);
-                    const tagMap = { 公告: i18n[currentLang].tag_announce, 教程: i18n[currentLang].tag_guide, 分析: i18n[currentLang].tag_analysis };
-                    html += `
-                        <article class="post-card" onclick="openArticleModal('${f}')">
-                            <div class="post-meta">
-                                <span class="tag${fm.tag === '公告' ? ' highlight' : ''}">${tagMap[fm.tag] || fm.tag || ''}</span>
-                                <span class="post-date">${fm.date || ''}</span>
-                            </div>
-                            <h3 class="post-title">${fm.title || ''}</h3>
-                            <p class="post-excerpt">${fm.excerpt || ''}</p>
-                        </article>`;
-                } catch(e) { /* skip */ }
+            for (const item of pageItems) {
+                const { file, fm } = item;
+                const tagMap = { 公告: i18n[currentLang].tag_announce, 教程: i18n[currentLang].tag_guide, 分析: i18n[currentLang].tag_analysis };
+                html += `
+                    <article class="post-card" onclick="openArticleModal('${file}')">
+                        <div class="post-meta">
+                            <span class="tag${fm.tag === '公告' ? ' highlight' : ''}">${tagMap[fm.tag] || fm.tag || ''}</span>
+                            <span class="post-date">${fm.date || ''}</span>
+                        </div>
+                        <h3 class="post-title">${fm.title || ''}</h3>
+                        <p class="post-excerpt">${fm.excerpt || ''}</p>
+                    </article>`;
             }
             if (html) container.innerHTML = html;
+            buildPagination('articles');
         }
 
-        // ========== 问卷数据 ==========
+        // ========== 问卷数据（分页） ==========
+        let _surveyData = [];
+
         async function renderSurveyData() {
             const container = document.getElementById('dataGrid');
             const files = contentManifest['survey-data'] || [];
+
+            if (_surveyData.length !== files.length) {
+                _surveyData = [];
+                for (const f of files) {
+                    try {
+                        const res = await fetch(f);
+                        if (!res.ok) continue;
+                        const text = await res.text();
+                        const { frontmatter: fm } = parseFrontmatter(text);
+                        _surveyData.push({ file: f, fm });
+                    } catch(e) { /* skip */ }
+                }
+            }
+
+            if (!pageState['survey-data']) {
+                pageState['survey-data'] = { page: 1, total: _surveyData.length, renderFn: renderSurveyData };
+            }
+            pageState['survey-data'].total = _surveyData.length;
+
+            const ps = PAGE_SIZE['survey-data'];
+            const start = (pageState['survey-data'].page - 1) * ps;
+            const pageItems = _surveyData.slice(start, start + ps);
+
             let html = '';
-            for (const f of files) {
-                try {
-                    const res = await fetch(f);
-                    if (!res.ok) continue;
-                    const text = await res.text();
-                    const { frontmatter: fm } = parseFrontmatter(text);
-                    const imgHtml = fm.chart_image
-                        ? `<img src="${fm.chart_image}" alt="${fm.title}" loading="lazy">`
-                        : '<span>&#128202; 数据预览图</span>';
-                    const dlBtn = fm.download_url && fm.download_url !== '#'
-                        ? `<button class="btn-sm" onclick="location.href='${fm.download_url}'">${i18n[currentLang].btn_download}</button>`
-                        : '';
-                    html += `
-                        <div class="data-card">
-                            <div class="data-card-img">${imgHtml}</div>
-                            <div class="data-card-body">
-                                <div class="data-card-title">${fm.title || ''}</div>
-                                <div class="data-card-desc">${fm.card_count ? `${fm.card_count} 种卡牌` : ''}${fm.vote_count ? ` &middot; ${fm.vote_count} 人次` : ''}</div>
-                                <div class="data-card-actions">
-                                    <button class="btn-sm primary">${i18n[currentLang].btn_view_img}</button>${dlBtn}
-                                </div>
+            for (const item of pageItems) {
+                const { f, fm } = item;
+                const imgHtml = fm.chart_image
+                    ? `<img src="${fm.chart_image}" alt="${fm.title}" loading="lazy">`
+                    : '<span>&#128202; 数据预览图</span>';
+                const dlBtn = fm.download_url && fm.download_url !== '#'
+                    ? `<button class="btn-sm" onclick="location.href='${fm.download_url}'">${i18n[currentLang].btn_download}</button>`
+                    : '';
+                html += `
+                    <div class="data-card">
+                        <div class="data-card-img">${imgHtml}</div>
+                        <div class="data-card-body">
+                            <div class="data-card-title">${fm.title || ''}</div>
+                            <div class="data-card-desc">${fm.card_count ? `${fm.card_count} 种卡牌` : ''}${fm.vote_count ? ` &middot; ${fm.vote_count} 人次` : ''}</div>
+                            <div class="data-card-actions">
+                                <button class="btn-sm primary">${i18n[currentLang].btn_view_img}</button>${dlBtn}
                             </div>
-                        </div>`;
-                } catch(e) { /* skip */ }
+                        </div>
+                    </div>`;
             }
             if (html) container.innerHTML = html;
+            buildPagination('survey-data');
         }
 
-        // ========== 视频列表 ==========
+        // ========== 视频列表（分页） ==========
+        let _videoData = [];
+
         async function renderVideos() {
             const container = document.getElementById('videoList');
             const files = contentManifest.videos || [];
+
+            if (_videoData.length !== files.length) {
+                _videoData = [];
+                for (const f of files) {
+                    try {
+                        const res = await fetch(f);
+                        if (!res.ok) continue;
+                        const text = await res.text();
+                        const { frontmatter: fm } = parseFrontmatter(text);
+                        _videoData.push({ file: f, fm });
+                    } catch(e) { /* skip */ }
+                }
+            }
+
+            if (!pageState.videos) {
+                pageState.videos = { page: 1, total: _videoData.length, renderFn: renderVideos };
+            }
+            pageState.videos.total = _videoData.length;
+
+            const ps = PAGE_SIZE.videos;
+            const start = (pageState.videos.page - 1) * ps;
+            const pageItems = _videoData.slice(start, start + ps);
+
             let html = '';
-            for (const f of files) {
-                try {
-                    const res = await fetch(f);
-                    if (!res.ok) continue;
-                    const text = await res.text();
-                    const { frontmatter: fm } = parseFrontmatter(text);
-                    const thumbHtml = fm.thumbnail ? `<img src="${fm.thumbnail}" loading="lazy">` : '<span>&#9654;</span>';
-                    html += `
-                        <a href="${fm.url || '#'}" target="_blank" rel="noopener noreferrer" class="video-item">
-                            <div class="video-thumb">${thumbHtml}</div>
-                            <div class="video-info">
-                                <div class="video-title">${fm.title || ''}</div>
-                                <div class="video-source">${fm.source || ''} &middot; ${fm.date || ''}</div>
-                            </div>
-                            <div class="video-arrow">&rarr;</div>
-                        </a>`;
-                } catch(e) { /* skip */ }
+            for (const item of pageItems) {
+                const { f, fm } = item;
+                const thumbHtml = fm.thumbnail ? `<img src="${fm.thumbnail}" loading="lazy">` : '<span>&#9654;</span>';
+                html += `
+                    <a href="${fm.url || '#'}" target="_blank" rel="noopener noreferrer" class="video-item">
+                        <div class="video-thumb">${thumbHtml}</div>
+                        <div class="video-info">
+                            <div class="video-title">${fm.title || ''}</div>
+                            <div class="video-source">${fm.source || ''} &middot; ${fm.date || ''}</div>
+                        </div>
+                        <div class="video-arrow">&rarr;</div>
+                    </a>`;
             }
             if (html) container.innerHTML = html;
+            buildPagination('videos');
         }
 
-        // ========== 历次改动 ==========
+        // ========== 历次改动（分页） ==========
+        let _historyData = [];
+
         async function renderHistory() {
             const container = document.getElementById('historyList');
             const files = contentManifest.history || [];
+
+            if (_historyData.length !== files.length) {
+                _historyData = [];
+                for (const f of files) {
+                    try {
+                        const res = await fetch(f);
+                        if (!res.ok) continue;
+                        const text = await res.text();
+                        const { frontmatter: fm } = parseFrontmatter(text);
+                        _historyData.push({ file: f, fm });
+                    } catch(e) { /* skip */ }
+                }
+            }
+
+            if (!pageState.history) {
+                pageState.history = { page: 1, total: _historyData.length, renderFn: renderHistory };
+            }
+            pageState.history.total = _historyData.length;
+
+            const ps = PAGE_SIZE.history;
+            const start = (pageState.history.page - 1) * ps;
+            const pageItems = _historyData.slice(start, start + ps);
+
             let html = '';
-            for (const f of files) {
-                try {
-                    const res = await fetch(f);
-                    if (!res.ok) continue;
-                    const text = await res.text();
-                    const { frontmatter: fm } = parseFrontmatter(text);
-                    const imgHtml = fm.image ? `<img src="${fm.image}" loading="lazy">` : '&#128203;';
-                    html += `
-                        <div class="history-item">
-                            <div class="history-item-img">${imgHtml}</div>
-                            <div class="history-item-info">
-                                <div class="history-item-month">${fm.title || ''}</div>
-                                <div class="history-item-count">+${fm.buffed || 0} 张加强 / ${fm.nerfed || 0} 张削弱</div>
-                            </div>
-                        </div>`;
-                } catch(e) { /* skip */ }
+            for (const item of pageItems) {
+                const { f, fm } = item;
+                const imgHtml = fm.image ? `<img src="${fm.image}" loading="lazy">` : '&#128203;';
+                html += `
+                    <div class="history-item">
+                        <div class="history-item-img">${imgHtml}</div>
+                        <div class="history-item-info">
+                            <div class="history-item-month">${fm.title || ''}</div>
+                            <div class="history-item-count">+${fm.buffed || 0} 张加强 / ${fm.nerfed || 0} 张削弱</div>
+                        </div>
+                    </div>`;
             }
             if (html) container.innerHTML = html;
+            buildPagination('history');
+        }
+
+        // ===== 通用分页工具 =====
+        const PAGE_SIZE = {
+            articles: 5,
+            'survey-data': 6,
+            videos: 6,
+            history: 8
+        };
+        const pageState = {}; // { section: { page: N, items: [], renderFn: func } }
+
+        /**
+         * 创建分页组件
+         * @param {string} sectionId - 板块标识（articles/survey-data/videos/history）
+         * @param {string} containerId - 列表容器 ID
+         * @param {string} pageId - 分页容器 ID
+         */
+        function buildPagination(sectionId) {
+            const st = pageState[sectionId];
+            if (!st || st.total <= PAGE_SIZE[sectionId]) return;
+
+            const totalPages = Math.ceil(st.total / PAGE_SIZE[sectionId]);
+            let html = '';
+
+            // 上一页
+            html += `<a href="javascript:goPage('${sectionId}',${st.page - 1})" ${st.page <= 1 ? 'style="pointer-events:none;opacity:.4;"' : ''}>&lsaquo;</a>`;
+
+            // 页码
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === st.page) {
+                    html += `<span class="current">${i}</span>`;
+                } else if (i === 1 || i === totalPages || Math.abs(i - st.page) <= 1) {
+                    html += `<a href="javascript:goPage('${sectionId}',${i})">${i}</a>`;
+                } else if (Math.abs(i - st.page) === 2) {
+                    html += `<span style="border:none;opacity:.5;">…</span>`;
+                }
+            }
+
+            // 下一页
+            html += `<a href="javascript:goPage('${sectionId}',${st.page + 1})" ${st.page >= totalPages ? 'style="pointer-events:none;opacity:.4;"' : ''}>&rsaquo;</a>`;
+
+            document.getElementById(sectionId + 'Pagination').style.display = '';
+            document.getElementById(sectionId + 'Pagination').innerHTML = html;
+        }
+
+        /**
+         * 跳转到指定页
+         */
+        function goPage(sectionId, targetPage) {
+            const st = pageState[sectionId];
+            if (!st) return;
+            const totalPages = Math.ceil(st.total / PAGE_SIZE[sectionId]);
+            if (targetPage < 1 || targetPage > totalPages) return;
+            st.page = targetPage;
+            st.renderFn();
         }
 
         // ===== 文章详情弹窗 =====
