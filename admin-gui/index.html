@@ -511,13 +511,13 @@ async function loadCollection(colName) {
     
     for (const item of items) {
       const fm = item.frontmatter || {};
-      const title = fm.title || item.filename.replace('.md', '');
+      const title = fm.title || String(item.filename || '').replace('.md', '');
       const date = fm.date || item.modified || '';
       const isHot = fm.hot === true || fm.hot === 'true';
       
       let badgesHtml = '';
       if (isHot) badgesHtml += '<span class="card-badge badge-hot">HOT</span>';
-      if (fm.tag) badgesHtml += `<span class="card-badge badge-tag">${fm.tag}</span>`;
+      if (fm.tag) badgesHtml += `<span class="card-badge badge-tag">${escapeHtml(String(fm.tag))}</span>`;
       
       cardsHtml += `
         <div class="card" data-path="${item.path}">
@@ -784,11 +784,13 @@ function showToast(type, message) {
 
 // ==================== 工具函数 ====================
 function escapeHtml(str) {
+  if (!str || typeof str !== 'string') return '';
   const div = document.createElement('div');
   div.textContent = str;
   return div.innerHTML;
 }
 function escapeJs(str) {
+  if (!str || typeof str !== 'string') return '';
   return str.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"');
 }
 
