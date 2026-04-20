@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{title}} - 中国社区昆特平衡数据库</title>
+    <style>
+        /* ===== 重置与基础 ===== */
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg: #fafafa;
+            --card-bg: #ffffff;
+            --text-primary: #1a1a1a;
+            --text-secondary: #666666;
+            --text-muted: #999999;
+            --accent: #2563eb;
+            --accent-hover: #1d4ed8;
+            --border: #e5e5e5;
+            --tag-bg: #f0f0f0;
+            --nav-bg: rgba(255,255,255,0.92);
+        }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            background: var(--bg); color: var(--text-primary); line-height: 1.7; min-height: 100vh;
+        }
+        a { color: inherit; text-decoration: none; }
+        a:hover { color: var(--accent); }
+
+        /* ===== 导航栏 ===== */
+        .navbar {
+            position: fixed; top: 0; left: 0; right: 0; height: 60px;
+            background: var(--nav-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border); display: flex; align-items: center;
+            justify-content: space-between; padding: 0 40px; z-index: 1000;
+        }
+        .logo { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
+        .logo span { color: var(--accent); }
+        .logo a:hover { color: inherit; }
+
+        /* ===== 主内容区 ===== */
+        .main-content { max-width: 780px; margin: 0 auto; padding: 90px 24px 60px; }
+
+        /* ===== 返回按钮 ===== */
+        .back-link {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-size: 14px; color: var(--accent); font-weight: 500;
+            margin-bottom: 28px; transition: opacity 0.2s;
+        }
+        .back-link:hover { opacity: 0.75; }
+
+        /* ===== 文章头部 ===== */
+        .article-header { margin-bottom: 32px; }
+        .article-tag {
+            display: inline-block; padding: 3px 12px; border-radius: 20px;
+            background: var(--tag-bg); font-size: 12.5px; color: var(--text-secondary);
+            font-weight: 500; margin-bottom: 14px;
+        }
+        .article-tag.highlight { background: rgba(37,99,235,0.08); color: var(--accent); }
+        .article-title {
+            font-size: 26px; font-weight: 700; line-height: 1.35;
+            color: var(--text-primary); margin-bottom: 14px;
+        }
+        .article-meta {
+            display: flex; align-items: center; gap: 16px;
+            font-size: 13.5px; color: var(--text-muted); flex-wrap: wrap;
+        }
+        .article-meta a { color: var(--accent); font-weight: 500; text-decoration: none; }
+        .article-meta a:hover { text-decoration: underline; }
+
+        /* ===== 文章正文 ===== */
+        .article-body {
+            font-size: 15px; line-height: 1.9; color: var(--text-secondary);
+            padding-bottom: 48px;
+        }
+        .article-body h1 { font-size: 22px; font-weight: 700; margin-top: 32px; margin-bottom: 10px; color: var(--text-primary); }
+        .article-body h2 { font-size: 19px; font-weight: 600; margin-top: 28px; margin-bottom: 8px; color: var(--text-primary); }
+        .article-body h3 { font-size: 16px; font-weight: 600; margin-top: 24px; margin-bottom: 6px; color: var(--text-primary); }
+        .article-body p { margin-bottom: 14px; }
+        .article-body ul, .article-body ol { margin-bottom: 14px; padding-left: 24px; }
+        .article-body li { margin-bottom: 5px; }
+        .article-body strong { color: var(--text-primary); }
+        .article-body code {
+            background: #f1f3f5; padding: 2px 7px; border-radius: 4px; font-size: 13.5px;
+        }
+        .article-body blockquote {
+            border-left: 3px solid var(--accent);
+            padding: 10px 18px; margin: 14px 0;
+            background: rgba(59,130,246,0.04); color: var(--text-muted);
+        }
+        .article-body img { max-width: 100%; border-radius: 8px; margin: 14px 0; }
+        .article-body a { color: var(--accent); text-decoration: none; }
+        .article-body a:hover { text-decoration: underline; }
+        .article-body hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+        /* ===== 页脚 ===== */
+        footer {
+            text-align: center; padding: 28px 24px; font-size: 12.5px;
+            color: var(--text-muted); border-top: 1px solid var(--border);
+        }
+        footer a { color: var(--text-secondary); }
+
+        /* ===== 响应式 ===== */
+        @media (max-width: 640px) {
+            .navbar { padding: 0 20px; }
+            .main-content { padding: 80px 16px 40px; }
+            .article-title { font-size: 21px; }
+            .article-body { font-size: 14.5px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- 导航栏 -->
+<nav class="navbar">
+    <div class="logo"><a href="../">昆特<span>平衡数据库</span></a></div>
+</nav>
+
+<!-- 主内容 -->
+<main class="main-content">
+
+    <!-- 返回按钮 -->
+    <a href="../" class="back-link">← {{back_text}}</a>
+
+    <!-- 文章内容 -->
+    <article class="article-header">
+        <span class="article-tag{{tag_class}}">{{tag}}</span>
+        <h1 class="article-title">{{title}}</h1>
+        <div class="article-meta">
+            <span>{{date}}</span>
+            {{source_link}}
+        </div>
+    </article>
+
+    <div class="article-body">
+        {{body}}
+    </div>
+
+</main>
+
+<!-- 页脚 -->
+<footer>
+    <p>&copy; 2026 中国社区昆特平衡数据库</p>
+</footer>
+
+</body>
+</html>

@@ -222,6 +222,28 @@ def update_manifest():
     return manifest
 
 
+def build_articles():
+    """调用 build.py 生成文章静态页（.md → posts/*.html）"""
+    import subprocess as sp
+    try:
+        result = sp.run(
+            [sys.executable, os.path.join(BLOG_DIR, "build.py")],
+            capture_output=True, text=True, timeout=30,
+            cwd=BLOG_DIR
+        )
+        if result.returncode == 0:
+            # 构建完成后重新读取 manifest（build.py 会更新 articles_html 字段）
+            with open(MANIFEST_FILE, 'r', encoding='utf-8') as f:
+                manifest = json.load(f)
+            count = len(manifest.get('articles_html', {}))
+            print(f"[构建] 文章静态页已生成 {count} 篇")
+            return {'ok': True, 'msg': f'generated {count} pages'}
+        else:
+            return {'ok': False, 'msg': result.stderr or result.stdout}
+    except Exception as e:
+        return {'ok': False, 'msg': str(e)}
+
+
 def git_push(commit_msg="update content"):
     """执行 Git 提交和推送操作"""
     try:
@@ -481,6 +503,11 @@ class AdminHandler(SimpleHTTPRequestHandler):
         if path == '/api/publish':
             # 先更新 manifest
             update_manifest()
+            # 执行文章静态页构建（.md → posts/*.html）
+            build_result = build_articles()
+            if not build_result['ok']:
+                # 构建失败不阻断发布，但记录警告
+                print(f"[警告] 文章构建失败：{build_result.get('msg', '未知错误')}")
             # 再 git push
             result = git_push(data.get('message', '发布内容更新'))
             self.send_json(result)

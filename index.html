@@ -769,7 +769,7 @@
                     ? `<a href="${fm.source_url}" target="_blank" rel="noopener noreferrer" class="post-source-btn" onclick="event.stopPropagation()">🔗 ${i18n[currentLang].btn_source || '查看原文'}</a>`
                     : '';
                 html += `
-                    <article class="post-card" onclick="openArticleModal('${file}')">
+                    <article class="post-card" onclick="goToArticle('${file}')">
                         <div class="post-meta">
                             <span class="tag${fm.tag === '故事' ? ' highlight' : ''}">${tagMap[fm.tag] || fm.tag || ''}</span>
                             <span class="post-date">${fm.date || ''}</span>
@@ -980,6 +980,18 @@
                 document.getElementById('articleModal').classList.add('active');
                 document.body.style.overflow = 'hidden';
             } catch(e) { console.warn('Failed to open news:', e); }
+        }
+
+        function goToArticle(mdFile) {
+            // 从 manifest 的 articles_html 映射中查找对应的静态页路径
+            const htmlMap = contentManifest.articles_html || {};
+            const htmlPath = htmlMap[mdFile.split('/').pop()]; // md文件名 → posts/xxx.html
+            if (htmlPath) {
+                window.location.href = htmlPath;
+            } else {
+                // 静态页不存在，fallback 到弹窗
+                openArticleModal(mdFile);
+            }
         }
 
         async function openArticleModal(file) {
