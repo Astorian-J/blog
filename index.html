@@ -689,7 +689,7 @@
                                 ${fm.hot ? `<span class="news-tag">${i18n[currentLang].tag_hot}</span>` : ''}
                                 <span class="news-date">${fm.date || ''}</span>
                             </div>
-                            <p class="news-text">${fm.excerpt || fm.title || ''}</p>
+                            <p class="news-text">${fm.title || ''}</p>
                         </div>`;
             }
             if (html) container.innerHTML = html;
