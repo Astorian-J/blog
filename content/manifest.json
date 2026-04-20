@@ -3,6 +3,7 @@
     "content/news/2026-04-17-2026年4月赛季昆特平衡玩家意愿问卷调查正式开始！.md"
   ],
   "articles": [
+    "content/articles/2026-04-20-测试222.md",
     "content/articles/2026-04-19-欢迎大家来我们的官方博客.md"
   ],
   "survey-data": [
@@ -16,15 +17,5 @@
     "content/videos/2026-02.md",
     "content/videos/2026-01.md",
     "content/videos/2025-11.md"
-  ],
-  "history": [
-    "content/history/2026-04.md",
-    "content/history/2026-03.md",
-    "content/history/2026-02.md",
-    "content/history/2026-01.md",
-    "content/history/2025-12.md",
-    "content/history/2025-11.md",
-    "content/history/2025-10.md",
-    "content/history/2025-09.md"
   ]
 }
