@@ -767,7 +767,7 @@
                 html += `
                     <article class="post-card" onclick="openArticleModal('${file}')">
                         <div class="post-meta">
-                            <span class="tag${fm.tag === '公告' ? ' highlight' : ''}">${tagMap[fm.tag] || fm.tag || ''}</span>
+                            <span class="tag${fm.tag === '故事' ? ' highlight' : ''}">${tagMap[fm.tag] || fm.tag || ''}</span>
                             <span class="post-date">${fm.date || ''}</span>
                         </div>
                         <h3 class="post-title">${fm.title || ''}</h3>
@@ -775,7 +775,8 @@
                         ${sourceBtn}
                     </article>`;
             }
-            if (html) container.innerHTML = html;
+            // 始终更新容器，空结果显示提示
+            container.innerHTML = html || '<div class="empty-state"><p style="color:var(--text-muted);padding:30px;text-align:center;">暂无该分类的文章</p></div>';
             buildPagination('articles');
         }
 
@@ -992,7 +993,7 @@
                     ? `<a href="${data.frontmatter.source_url}" target="_blank" rel="noopener noreferrer" style="margin-left:12px;color:var(--accent);font-size:13px;font-weight:500;text-decoration:none;">🔗 ${i18n[currentLang].btn_source || '查看原文'}</a>`
                     : '';
                 document.getElementById('modalMeta').innerHTML =
-                    `<span class="tag${data.frontmatter.tag === '公告' ? ' highlight' : ''}">${tagMap[data.frontmatter.tag] || data.frontmatter.tag || ''}</span>` +
+                    `<span class="tag${data.frontmatter.tag === '故事' ? ' highlight' : ''}">${tagMap[data.frontmatter.tag] || data.frontmatter.tag || ''}</span>` +
                     ` &nbsp; ${data.frontmatter.date || ''}${sourceLink}`;
                 document.getElementById('modalBody').innerHTML = renderMd(data.body);
                 document.getElementById('articleModal').classList.add('active');
