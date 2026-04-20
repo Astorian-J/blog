@@ -150,6 +150,22 @@
         .submit-notice a { color: var(--accent); font-weight: 500; }
         .submit-notice a:hover { text-decoration: underline; }
 
+        /* ===== 分类筛选栏 ===== */
+        .filter-bar {
+            display: flex; gap: 8px; flex-wrap: wrap;
+            margin-bottom: 18px; padding-bottom: 2px;
+        }
+        .filter-btn {
+            padding: 5px 16px; border-radius: 20px; font-size: 13px;
+            background: var(--tag-bg); color: var(--text-secondary); border: 1px solid transparent;
+            cursor: pointer; transition: all 0.2s; user-select: none;
+            font-weight: 500;
+        }
+        .filter-btn:hover { border-color: var(--border); }
+        .filter-btn.active {
+            background: var(--accent); color: #fff; border-color: var(--accent);
+        }
+
         /* ===== 文章卡片列表 ===== */
         .post-list { display: flex; flex-direction: column; gap: 16px; }
         .post-card {
@@ -404,6 +420,7 @@
             <div class="submit-notice">
                 <span data-i18n="submit_notice">欢迎大家投稿文章，投稿邮箱：</span><a href="mailto:gwenttg@163.com">gwenttg@163.com</a>
             </div>
+            <div class="filter-bar" id="articleFilterBar"></div>
             <div class="post-list" id="articleList">
                 <!-- JS动态渲染 -->
             </div>
@@ -482,9 +499,11 @@
                 btn_view_img: '查看图表', btn_raw: '原始问卷', btn_stat: '统计结果', btn_video: '相关视频',
                 btn_source: '查看原文',
                 submit_notice: '欢迎大家投稿文章，投稿邮箱：',
+                filter_all: '全部', filter_story: '故事', filter_guide: '教程',
+                filter_analysis: '分析', filter_chat: '杂谈',
                 footer_copyright: '&copy; 2026 中国社区昆特平衡数据库',
                 footer_powered: 'Powered by <a href="#">GitHub Pages</a>',
-                tag_announce: '公告', tag_guide: '教程', tag_analysis: '分析'
+                tag_announce: '故事', tag_guide: '教程', tag_analysis: '分析'
             },
             en: {
                 logo: 'Gwent<span>DB</span>',
@@ -500,6 +519,8 @@
                 btn_view_img: 'View Chart', btn_raw: 'Raw Data', btn_stat: 'Statistics', btn_video: 'Video',
                 btn_source: 'View Source',
                 submit_notice: 'Community submissions welcome, email to: ',
+                filter_all: 'All', filter_story: 'Story', filter_guide: 'Guide',
+                filter_analysis: 'Analysis', filter_chat: 'Chat',
                 footer_copyright: '&copy; 2026 CN Community Gwent Balance Database',
                 footer_powered: 'Powered by <a href="#">GitHub Pages</a>',
                 tag_announce: 'Announce', tag_guide: 'Guide', tag_analysis: 'Analysis'
@@ -671,8 +692,16 @@
             if (html) container.innerHTML = html;
         }
 
-        // ========== 文章发布（分页） ==========
+        // ========== 文章发布（分页 + 筛选） ==========
         let _articlesData = []; // 缓存所有文章数据
+        let _articleFilter = 'all'; // 当前筛选标签: all / 故事 / 教程 / 分析 / 杂谈
+        const ARTICLE_FILTERS = [
+            { key: 'all', i18nKey: 'filter_all' },
+            { key: '故事', i18nKey: 'filter_story' },
+            { key: '教程', i18nKey: 'filter_guide' },
+            { key: '分析', i18nKey: 'filter_analysis' },
+            { key: '杂谈', i18nKey: 'filter_chat' },
+        ];
 
         async function renderArticles() {
             const container = document.getElementById('articleList');
@@ -693,20 +722,45 @@
                 sortByDateDesc(_articlesData);
             }
 
-            // 初始化分页状态 — 用 manifest 总数，不用加载成功数
-            if (!pageState.articles) {
-                pageState.articles = { page: 1, total: files.length, renderFn: renderArticles };
+            // 渲染筛选栏（仅首次）
+            const filterBar = document.getElementById('articleFilterBar');
+            if (!filterBar.innerHTML.trim()) {
+                let fbHtml = '';
+                for (const ft of ARTICLE_FILTERS) {
+                    fbHtml += `<button class="filter-btn${ft.key === _articleFilter ? ' active' : ''}" data-filter="${ft.key}">${i18n[currentLang][ft.i18nKey] || ft.key}</button>`;
+                }
+                filterBar.innerHTML = fbHtml;
+                // 绑定点击事件
+                filterBar.querySelectorAll('.filter-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        filterBar.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        _articleFilter = btn.dataset.filter;
+                        pageState.articles.page = 1; // 重置到第1页
+                        renderArticles();
+                    });
+                });
             }
-            pageState.articles.total = files.length;
+
+            // 按标签筛选
+            const filteredData = _articleFilter === 'all'
+                ? _articlesData
+                : _articlesData.filter(item => item.fm.tag === _articleFilter);
+
+            // 初始化分页状态 — 用筛选后总数
+            if (!pageState.articles) {
+                pageState.articles = { page: 1, total: filteredData.length, renderFn: renderArticles };
+            }
+            pageState.articles.total = filteredData.length;
 
             const ps = PAGE_SIZE.articles;
             const start = (pageState.articles.page - 1) * ps;
-            const pageItems = _articlesData.slice(start, start + ps);
+            const pageItems = filteredData.slice(start, start + ps);
 
             let html = '';
             for (const item of pageItems) {
                 const { file, fm } = item;
-                const tagMap = { 公告: i18n[currentLang].tag_announce, 教程: i18n[currentLang].tag_guide, 分析: i18n[currentLang].tag_analysis };
+                const tagMap = { 故事: i18n[currentLang].tag_announce, 教程: i18n[currentLang].tag_guide, 分析: i18n[currentLang].tag_analysis };
                 const sourceBtn = fm.source_url && fm.source_url !== '#'
                     ? `<a href="${fm.source_url}" target="_blank" rel="noopener noreferrer" class="post-source-btn" onclick="event.stopPropagation()">🔗 ${i18n[currentLang].btn_source || '查看原文'}</a>`
                     : '';
@@ -933,7 +987,7 @@
                     articleCache[file] = data;
                 }
                 document.getElementById('modalTitle').textContent = data.frontmatter.title || '';
-                const tagMap = { 公告: '公告', 教程: '教程', 分析: '分析' };
+                const tagMap = { 故事: '故事', 教程: '教程', 分析: '分析' };
                 const sourceLink = data.frontmatter.source_url && data.frontmatter.source_url !== '#'
                     ? `<a href="${data.frontmatter.source_url}" target="_blank" rel="noopener noreferrer" style="margin-left:12px;color:var(--accent);font-size:13px;font-weight:500;text-decoration:none;">🔗 ${i18n[currentLang].btn_source || '查看原文'}</a>`
                     : '';
