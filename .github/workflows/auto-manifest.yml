@@ -29,7 +29,7 @@ jobs:
       - name: Generate manifest.json
         run: |
           cat > gen_manifest.py << 'PYEOF'
-          import os, json
+          import os, json, re
 
           collections = ["news", "articles", "survey-data", "videos", "history"]
           manifest = {}
@@ -42,6 +42,15 @@ jobs:
                       if f.endswith('.md'):
                           files.append(f"content/{col}/{f}")
               manifest[col] = files
+
+          # Preserve existing articles_html mapping if present
+          try:
+              with open("content/manifest.json", "r", encoding="utf-8") as fp:
+                  old_manifest = json.load(fp)
+                  if "articles_html" in old_manifest:
+                      manifest["articles_html"] = old_manifest["articles_html"]
+          except Exception:
+              pass
 
           with open("content/manifest.json", "w", encoding="utf-8") as fp:
               json.dump(manifest, fp, indent=2, ensure_ascii=False)
