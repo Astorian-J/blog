@@ -4,7 +4,9 @@
     "content/news/2026-04-17-2026年4月赛季昆特平衡玩家意愿问卷调查正式开始！.md",
     "content/news/2026-04-01-俄区主播metallicdanny-md-入驻bilibili.md"
   ],
-  "articles": [],
+  "articles": [
+    "content/articles/2026-04-20-昆特牌-平衡委员会的作用是什么-成功-失败与民主的类比.md"
+  ],
   "survey-data": [
     "content/survey-data/2026-04.md",
     "content/survey-data/2026-03.md",
@@ -16,5 +18,8 @@
     "content/videos/2026-02.md",
     "content/videos/2026-01.md",
     "content/videos/2025-11.md"
-  ]
+  ],
+  "articles_html": {
+    "2026-04-20-昆特牌-平衡委员会的作用是什么-成功-失败与民主的类比.md": "posts/昆特牌-平衡委员会的作用是什么-成功-失败与民主的类比.html"
+  }
 }
