@@ -140,6 +140,16 @@
             display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
         }
 
+        /* ===== 投稿提示 ===== */
+        .submit-notice {
+            font-size: 13px; color: var(--text-secondary); line-height: 1.6;
+            padding: 10px 16px; background: rgba(37,99,235,0.04);
+            border: 1px solid rgba(37,99,235,0.12);
+            border-radius: 8px; margin-bottom: 14px; text-align: center;
+        }
+        .submit-notice a { color: var(--accent); font-weight: 500; }
+        .submit-notice a:hover { text-decoration: underline; }
+
         /* ===== 文章卡片列表 ===== */
         .post-list { display: flex; flex-direction: column; gap: 16px; }
         .post-card {
@@ -391,6 +401,9 @@
                 <h2 class="section-title" data-i18n="sec_articles">文章发布</h2>
                 <span class="section-subtitle" data-i18n="sec_articles_sub">Articles</span>
             </div>
+            <div class="submit-notice">
+                <span data-i18n="submit_notice">欢迎大家投稿文章，投稿邮箱：</span><a href="mailto:gwenttg@163.com">gwenttg@163.com</a>
+            </div>
             <div class="post-list" id="articleList">
                 <!-- JS动态渲染 -->
             </div>
@@ -468,6 +481,7 @@
                 tag_hot: 'HOT',
                 btn_view_img: '查看图表', btn_raw: '原始问卷', btn_stat: '统计结果', btn_video: '相关视频',
                 btn_source: '查看原文',
+                submit_notice: '欢迎大家投稿文章，投稿邮箱：',
                 footer_copyright: '&copy; 2026 中国社区昆特平衡数据库',
                 footer_powered: 'Powered by <a href="#">GitHub Pages</a>',
                 tag_announce: '公告', tag_guide: '教程', tag_analysis: '分析'
@@ -485,6 +499,7 @@
                 tag_hot: 'HOT',
                 btn_view_img: 'View Chart', btn_raw: 'Raw Data', btn_stat: 'Statistics', btn_video: 'Video',
                 btn_source: 'View Source',
+                submit_notice: 'Community submissions welcome, email to: ',
                 footer_copyright: '&copy; 2026 CN Community Gwent Balance Database',
                 footer_powered: 'Powered by <a href="#">GitHub Pages</a>',
                 tag_announce: 'Announce', tag_guide: 'Guide', tag_analysis: 'Analysis'
