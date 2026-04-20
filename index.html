@@ -770,7 +770,7 @@
                     ? `<a href="${fm.source_url}" target="_blank" rel="noopener noreferrer" class="post-source-btn" onclick="event.stopPropagation()">🔗 ${i18n[currentLang].btn_source || '查看原文'}</a>`
                     : '';
                 html += `
-                    <article class="post-card" onclick="goToArticle('${file}','${(fm.title||'').replace(/'/g,\"\\'\")}')">
+                    <article class="post-card" data-file="${file}">
                         <div class="post-meta">
                             <span class="tag${fm.tag === '故事' ? ' highlight' : ''}">${tagMap[fm.tag] || fm.tag || ''}</span>
                             <span class="post-date">${fm.date || ''}</span>
@@ -782,6 +782,19 @@
             }
             // 始终更新容器，空结果显示提示
             container.innerHTML = html || '<div class="empty-state"><p style="color:var(--text-muted);padding:30px;text-align:center;">暂无该分类的文章</p></div>';
+
+            // 文章卡片点击 → 跳转独立页面（事件委托）
+            container.querySelectorAll('.post-card[data-file]').forEach(card => {
+                card.addEventListener('click', () => {
+                    const mdFile = card.dataset.file;
+                    // 从缓存数据中查找标题
+                    let title = '';
+                    for (const item of _articlesData) {
+                        if (item.file === mdFile) { title = item.fm.title || ''; break; }
+                    }
+                    goToArticle(mdFile, title);
+                });
+            });
             buildPagination('articles');
         }
 
