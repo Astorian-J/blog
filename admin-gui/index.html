@@ -610,7 +610,7 @@ async function renderEditForm(colName, values) {
           </div>` : '';
         const hint = field.hint ? `<div class="editor-hint">${field.hint}</div>` : '';
         formHtml += `<div class="form-group"><label>${field.label}${required}</label>
-          <textarea class="form-control" id="f_${field.name}" rows="${isMarkdown?8:3}"
+          <textarea class="form-control" id="f_${field.name}" rows="${isMarkdown?8:5}"
           placeholder="${field.hint || ''}">${escapeHtml(val)}</textarea>${uploadBtn}${hint}</div>`;
       } else {
         const hint = field.hint ? `<div class="editor-hint">${field.hint}</div>` : '';
