@@ -567,6 +567,8 @@ async function showEditModal(colName, filePath) {
     const res = await fetch(`${API}/api/file/${encodeURIComponent(filePath)}`);
     const data = await res.json();
     currentData = data.frontmatter || {};
+    // 用独立返回的完整 body 覆盖 frontmatter 中可能存在的截断版 body
+    if (data.body !== undefined) currentData.body = data.body;
     currentData._body = data.body || '';
     renderEditForm(colName, currentData);
   } catch(err) {
