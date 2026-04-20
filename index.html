@@ -971,7 +971,8 @@
                 document.getElementById('modalMeta').innerHTML =
                     `${data.frontmatter.hot ? `<span class="tag highlight">${i18n[currentLang].tag_hot}</span>` : ''}` +
                     ` &nbsp; ${data.frontmatter.date || ''}`;
-                document.getElementById('modalBody').innerHTML = renderMd(data.body || data.frontmatter.excerpt || '');
+                const bodyText = (data.body && data.body.trim()) || (data.frontmatter.excerpt && data.frontmatter.excerpt.trim()) || '';
+                document.getElementById('modalBody').innerHTML = bodyText ? renderMd(bodyText) : '<p style="color:var(--text-muted);text-align:center;padding:20px;">暂无详细内容</p>';
                 document.getElementById('articleModal').classList.add('active');
                 document.body.style.overflow = 'hidden';
             } catch(e) { console.warn('Failed to open news:', e); }
