@@ -770,7 +770,7 @@
                     ? `<a href="${fm.source_url}" target="_blank" rel="noopener noreferrer" class="post-source-btn" onclick="event.stopPropagation()">🔗 ${i18n[currentLang].btn_source || '查看原文'}</a>`
                     : '';
                 html += `
-                    <article class="post-card" onclick="goToArticle('${file}')">
+                    <article class="post-card" onclick="goToArticle('${file}','${(fm.title||'').replace(/'/g,\"\\'\")}')">
                         <div class="post-meta">
                             <span class="tag${fm.tag === '故事' ? ' highlight' : ''}">${tagMap[fm.tag] || fm.tag || ''}</span>
                             <span class="post-date">${fm.date || ''}</span>
@@ -983,16 +983,24 @@
             } catch(e) { console.warn('Failed to open news:', e); }
         }
 
-        function goToArticle(mdFile) {
-            // 从 manifest 的 articles_html 映射中查找对应的静态页路径
-            const htmlMap = contentManifest.articles_html || {};
-            const htmlPath = htmlMap[mdFile.split('/').pop()]; // md文件名 → posts/xxx.html
-            if (htmlPath) {
-                window.location.href = htmlPath;
+        function goToArticle(mdFile, title) {
+            // 直接从标题构造静态页路径：posts/slug.html
+            // 不再依赖 manifest.articles_html（会被GitHub Actions覆盖）
+            const slug = titleToSlug(title || '');
+            if (slug) {
+                window.location.href = 'posts/' + slug + '.html';
             } else {
-                // 静态页不存在，fallback 到弹窗
                 openArticleModal(mdFile);
             }
+        }
+
+        function titleToSlug(title) {
+            if (!title) return '';
+            return title.toLowerCase()
+                .replace(/[^\w\u4e00-\u9fff\-]/g, '-')
+                .replace(/-+/g, '-')
+                .replace(/^-|-$/g, '')
+                || '';
         }
 
         async function openArticleModal(file) {
