@@ -1,1 +1,39 @@
-{"news": ["content/news/2026-04-20-中国选手软泥怪与俄区主播dauren-土耳其主播kerpeten96以及ic独立联盟一起组成平衡联盟.md", "content/news/2026-04-17-2026年4月赛季昆特平衡玩家意愿问卷调查正式开始！.md", "content/news/2026-04-01-俄区主播metallicdanny-md-入驻bilibili.md"], "articles": ["content/articles/2026-04-20-昆特牌-平衡委员会的作用是什么-成功-失败与民主的类比.md"], "survey-data": ["content/survey-data/2026-04.md", "content/survey-data/2026-03.md", "content/survey-data/2026-02.md"], "videos": ["content/videos/2026-04.md", "content/videos/2026-03.md", "content/videos/2026-02.md", "content/videos/2026-01.md", "content/videos/2025-11.md"], "history": ["content/history/2026-04.md", "content/history/2026-03.md", "content/history/2026-02.md", "content/history/2026-01.md", "content/history/2025-12.md", "content/history/2025-11.md", "content/history/2025-10.md", "content/history/2025-09.md"], "bc-recommendations": ["content/bc-recommendations/2026-04-21-zong.md", "content/bc-recommendations/2026-04-21-md.md"], "articles_html": {"2026-04-20-昆特牌-平衡委员会的作用是什么-成功-失败与民主的类比.md": "posts/昆特牌-平衡委员会的作用是什么-成功-失败与民主的类比.html"}}
+{
+  "news": [
+    "content/news/2026-04-20-中国选手软泥怪与俄区主播dauren-土耳其主播kerpeten96以及ic独立联盟一起组成平衡联盟.md",
+    "content/news/2026-04-17-2026年4月赛季昆特平衡玩家意愿问卷调查正式开始！.md",
+    "content/news/2026-04-01-俄区主播metallicdanny-md-入驻bilibili.md"
+  ],
+  "articles": [
+    "content/articles/2026-04-20-昆特牌-平衡委员会的作用是什么-成功-失败与民主的类比.md"
+  ],
+  "survey-data": [
+    "content/survey-data/2026-04.md",
+    "content/survey-data/2026-03.md",
+    "content/survey-data/2026-02.md"
+  ],
+  "videos": [
+    "content/videos/2026-04.md",
+    "content/videos/2026-03.md",
+    "content/videos/2026-02.md",
+    "content/videos/2026-01.md",
+    "content/videos/2025-11.md"
+  ],
+  "history": [
+    "content/history/2026-04.md",
+    "content/history/2026-03.md",
+    "content/history/2026-02.md",
+    "content/history/2026-01.md",
+    "content/history/2025-12.md",
+    "content/history/2025-11.md",
+    "content/history/2025-10.md",
+    "content/history/2025-09.md"
+  ],
+  "bc-recommendations": [
+    "content/bc-recommendations/2026-04-21-zong.md",
+    "content/bc-recommendations/2026-04-21-md.md"
+  ],
+  "articles_html": {
+    "2026-04-20-昆特牌-平衡委员会的作用是什么-成功-失败与民主的类比.md": "posts/昆特牌-平衡委员会的作用是什么-成功-失败与民主的类比.html"
+  }
+}
