@@ -491,17 +491,7 @@ async function loadCollection(colName) {
     const countEl = document.getElementById(`count-${colName}`);
     if (countEl) countEl.textContent = items.length;
     
-    if (items.length === 0) {
-      contentArea.innerHTML = `
-        <div class="empty-state">
-          <div class="icon">📭</div>
-          <p>暂无内容</p>
-          <button class="btn btn-primary" onclick="showAddModal('${colName}')">➕ 添加${COLLECTION_CONFIG[colName] || ''}</button>
-        </div>`;
-      return;
-    }
-    
-    // 平衡推荐汇总：始终显示两栏（中国社区 / 其他社区）
+    // ===== 平衡推荐汇总：始终显示两栏（中国社区 / 其他社区）—— 放在最前面 =====
     if (colName === 'bc-recommendations') {
       const cnItems = items.filter(i => {
         const c = (i.frontmatter || {}).community || '';
@@ -537,7 +527,6 @@ async function loadCollection(colName) {
           <button class="btn btn-sm btn-primary" onclick="showAddModal('${colName}')">➕ 添加</button>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
-          <!-- 中国社区 -->
           <div>
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid #dc2626;">
               <div style="width:10px;height:10px;border-radius:50%;background:#dc2626;flex-shrink:0;"></div>
@@ -548,7 +537,6 @@ async function loadCollection(colName) {
               '<p style="color:var(--text-muted);padding:16px;text-align:center;font-size:13px;">暂无数据，点击上方按钮添加</p>'}
             </div>
           </div>
-          <!-- 其他社区 -->
           <div>
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid #2563eb;">
               <div style="width:10px;height:10px;border-radius:50%;background:#2563eb;flex-shrink:0;"></div>
@@ -562,8 +550,25 @@ async function loadCollection(colName) {
         </div>`;
       return;
     }
-
+    
     if (items.length === 0) {
+      contentArea.innerHTML = `
+        <div class="empty-state">
+          <div class="icon">📭</div>
+          <p>暂无内容</p>
+          <button class="btn btn-primary" onclick="showAddModal('${colName}')">➕ 添加${COLLECTION_CONFIG[colName] || ''}</button>
+        </div>`;
+      return;
+    }
+    
+    let cardsHtml = `
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <h2 style="font-size:18px;font-weight:600;">${COLLECTION_CONFIG[colName] || colName}</h2>
+        <button class="btn btn-sm btn-primary" onclick="showAddModal('${colName}')">➕ 添加</button>
+      </div>
+      <div class="card-list">`;
+    
+    for (const item of items) {
       const fm = item.frontmatter || {};
       // 智能标题：优先用 title，没有则用 author+community 或文件名
       let title = fm.title || '';
