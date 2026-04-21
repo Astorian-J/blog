@@ -584,10 +584,7 @@ class AdminHandler(SimpleHTTPRequestHandler):
                 self.send_json({'error': f'不支持的文件格式: {ext}，允许 {allowed_exts}'}, status=400)
                 return
 
-            # 限制单张 5MB
-            if len(file_data) > 5 * 1024 * 1024:
-                self.send_json({'error': '图片大小不能超过 5MB'}, status=400)
-                return
+            # 不限制图片大小（本地存储，按月替换）
 
             # 生成唯一文件名
             unique_name = f"{uuid.uuid4().hex[:8]}_{safe_name}{ext}"
