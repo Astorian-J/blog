@@ -219,13 +219,33 @@
 // ===== 加载推荐数据 =====
 (async function loadBCData() {
     try {
-        // 读取 manifest 获取文件列表
-        const resp = await fetch('./content/manifest.json');
-        if (!resp.ok) throw new Error('no manifest');
-        const manifest = await resp.json();
+        // 方案1：先尝试从 manifest 获取文件列表
+        let files = [];
+        try {
+            const resp = await fetch('./content/manifest.json');
+            if (resp.ok) {
+                const manifest = await resp.json();
+                files = manifest['bc-recommendations'] || [];
+            }
+        } catch(e) { /* manifest 读取失败，走方案2 */ }
 
-        // 获取平衡推荐文件列表
-        const files = manifest['bc-recommendations'] || [];
+        // 方案2：如果 manifest 中没有 bc-recommendations，直接扫描已知文件名模式
+        if (files.length === 0) {
+            console.log('[BC] manifest 中无 bc-recommendations，尝试直接扫描...');
+            // 已知可能的文件名列表（通过扫描 content/bc-recommendations/ 目录）
+            const knownFiles = [
+                'content/bc-recommendations/2026-04-21-zong.md',
+                'content/bc-recommendations/2026-04-21-md.md',
+            ];
+            // 逐个检查文件是否存在
+            for (const f of knownFiles) {
+                try {
+                    const r = await fetch('./' + f);
+                    if (r.ok) files.push(f);
+                } catch(e) { /* skip */ }
+            }
+            console.log(`[BC] 扫描到 ${files.length} 个文件`);
+        }
         if (files.length === 0) {
             renderEmpty('cnList');
             renderEmpty('otherList');
