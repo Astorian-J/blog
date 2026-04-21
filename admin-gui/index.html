@@ -524,27 +524,32 @@ async function loadCollection(colName) {
       contentArea.innerHTML = `
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
           <h2 style="font-size:18px;font-weight:600;">${COLLECTION_CONFIG[colName] || colName}</h2>
-          <button class="btn btn-sm btn-primary" onclick="showAddModal('${colName}')">➕ 添加</button>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
           <div>
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid #dc2626;">
-              <div style="width:10px;height:10px;border-radius:50%;background:#dc2626;flex-shrink:0;"></div>
-              <strong>🇨🇳 中国社区</strong>
-              <span style="color:var(--text-muted);font-size:13px;">(${cnItems.length})</span>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid #dc2626;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <div style="width:10px;height:10px;border-radius:50%;background:#dc2626;flex-shrink:0;"></div>
+                <strong>🇨🇳 中国社区</strong>
+                <span style="color:var(--text-muted);font-size:13px;">(${cnItems.length})</span>
+              </div>
+              <button class="btn btn-sm btn-primary" onclick="showAddModal('${colName}', null, '中国社区')">➕ 添加</button>
             </div>
             <div class="card-list">${cnItems.length ? cnItems.map(renderBCItem).join('') :
-              '<p style="color:var(--text-muted);padding:16px;text-align:center;font-size:13px;">暂无数据，点击上方按钮添加</p>'}
+              '<p style="color:var(--text-muted);padding:16px;text-align:center;font-size:13px;">暂无数据，点击右上角按钮添加</p>'}
             </div>
           </div>
           <div>
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid #2563eb;">
-              <div style="width:10px;height:10px;border-radius:50%;background:#2563eb;flex-shrink:0;"></div>
-              <strong>🌍 其他社区</strong>
-              <span style="color:var(--text-muted);font-size:13px;">(${otherItems.length})</span>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid #2563eb;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <div style="width:10px;height:10px;border-radius:50%;background:#2563eb;flex-shrink:0;"></div>
+                <strong>🌍 其他社区</strong>
+                <span style="color:var(--text-muted);font-size:13px;">(${otherItems.length})</span>
+              </div>
+              <button class="btn btn-sm btn-primary" onclick="showAddModal('${colName}', null, '其他')">➕ 添加</button>
             </div>
             <div class="card-list">${otherItems.length ? otherItems.map(renderBCItem).join('') :
-              '<p style="color:var(--text-muted);padding:16px;text-align:center;font-size:13px;">暂无数据，点击上方按钮添加</p>'}
+              '<p style="color:var(--text-muted);padding:16px;text-align:center;font-size:13px;">暂无数据，点击右上角按钮添加</p>'}
             </div>
           </div>
         </div>`;
@@ -615,10 +620,11 @@ async function loadCollection(colName) {
 }
 
 // ==================== 新增模态框 ====================
-function showAddModal(colName) {
+function showAddModal(colName, defaultCommunity) {
   editingPath = null;
   document.getElementById('editModalTitle').textContent = `➕ 新增 ${COLLECTION_CONFIG[colName] || colName}`;
-  renderEditForm(colName, {});
+  const defaultVals = defaultCommunity ? { community: defaultCommunity } : {};
+  renderEditForm(colName, defaultVals);
   document.getElementById('editModal').classList.add('show');
 }
 
