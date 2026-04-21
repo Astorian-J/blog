@@ -501,8 +501,8 @@ async function loadCollection(colName) {
       return;
     }
     
-    // 平衡推荐汇总：两栏布局（中国社区 / 其他社区）
-    if (colName === 'bc-recommendations' && items.length > 0) {
+    // 平衡推荐汇总：始终显示两栏（中国社区 / 其他社区）
+    if (colName === 'bc-recommendations') {
       const cnItems = items.filter(i => {
         const c = (i.frontmatter || {}).community || '';
         return c === '中国社区' || c === 'CN';
@@ -545,7 +545,7 @@ async function loadCollection(colName) {
               <span style="color:var(--text-muted);font-size:13px;">(${cnItems.length})</span>
             </div>
             <div class="card-list">${cnItems.length ? cnItems.map(renderBCItem).join('') :
-              '<p style="color:var(--text-muted);padding:16px;text-align:center;font-size:13px;">暂无数据</p>'}
+              '<p style="color:var(--text-muted);padding:16px;text-align:center;font-size:13px;">暂无数据，点击上方按钮添加</p>'}
             </div>
           </div>
           <!-- 其他社区 -->
@@ -556,21 +556,14 @@ async function loadCollection(colName) {
               <span style="color:var(--text-muted);font-size:13px;">(${otherItems.length})</span>
             </div>
             <div class="card-list">${otherItems.length ? otherItems.map(renderBCItem).join('') :
-              '<p style="color:var(--text-muted);padding:16px;text-align:center;font-size:13px;">暂无数据</p>'}
+              '<p style="color:var(--text-muted);padding:16px;text-align:center;font-size:13px;">暂无数据，点击上方按钮添加</p>'}
             </div>
           </div>
         </div>`;
       return;
     }
 
-    let cardsHtml = `
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-        <h2 style="font-size:18px;font-weight:600;">${COLLECTION_CONFIG[colName] || colName}</h2>
-        <button class="btn btn-sm btn-primary" onclick="showAddModal('${colName}')">➕ 添加</button>
-      </div>
-      <div class="card-list">`;
-    
-    for (const item of items) {
+    if (items.length === 0) {
       const fm = item.frontmatter || {};
       // 智能标题：优先用 title，没有则用 author+community 或文件名
       let title = fm.title || '';
