@@ -432,7 +432,7 @@ async function init() {
 // 分类键名（从后端获取后覆盖）
 let COLLECTION_CONFIG = {};
 
-const COLLECTION_KEYS = ['news', 'articles', 'survey-data', 'videos'];
+const COLLECTION_KEYS = ['news', 'articles', 'survey-data', 'videos', 'bc-recommendations'];
 
 // ==================== 加载分类列表 ====================
 async function loadCollections() {
@@ -510,7 +510,15 @@ async function loadCollection(colName) {
     
     for (const item of items) {
       const fm = item.frontmatter || {};
-      const title = fm.title || String(item.filename || '').replace('.md', '');
+      // 智能标题：优先用 title，没有则用 author+community 或文件名
+      let title = fm.title || '';
+      if (!title) {
+        if (fm.author) {
+          title = fm.author + (fm.community ? ` (${fm.community})` : '');
+        } else {
+          title = String(item.filename || '').replace('.md', '');
+        }
+      }
       const date = fm.date || item.modified || '';
       const isHot = fm.hot === true || fm.hot === 'true';
       
@@ -615,6 +623,18 @@ async function renderEditForm(colName, values) {
         formHtml += `<div class="form-group"><label>${field.label}${required}</label>
           <textarea class="form-control" id="f_${field.name}" rows="${taRows}"
           placeholder="${field.hint || ''}">${escapeHtml(val)}</textarea>${uploadBtn}${hint}</div>`;
+      } else if (field.type === 'image') {
+        // 图片上传字段
+        const previewImg = val ? `<img src="${val.startsWith('http') ? val : '../' + val}" style="max-width:100%;max-height:200px;border-radius:8px;border:1px solid var(--border);margin-bottom:8px;display:block;" alt="preview">` : '';
+        formHtml += `<div class="form-group"><label>${field.label}${required}</label>
+          <div id="img-preview-wrap-${field.name}">${previewImg}</div>
+          <input type="hidden" id="f_${field.name}" value="${escapeHtml(String(val))}">
+          <label class="btn btn-sm" style="cursor:pointer;background:var(--bg-tertiary);border-color:var(--accent);color:var(--accent);padding:5px 14px;font-size:12px;border-radius:6px;display:inline-flex;align-items:center;gap:4px;margin-top:6px;">
+            ${val ? '🔄 更换图片' : '📤 上传图片'}
+            <input type="file" accept=".png,.jpg,.jpeg,.gif,.webp,.svg" onchange="uploadImageForField(this, 'f_${field.name}', true)" style="display:none;">
+          </label>
+          <span id="img-status-${field.name}" style="font-size:12px;color:var(--text-secondary);display:block;margin-top:4px;"></span>
+          </div>`;
       } else {
         const hint = field.hint ? `<div class="editor-hint">${field.hint}</div>` : '';
         formHtml += `<div class="form-group"><label>${field.label}${required}</label>
@@ -810,12 +830,13 @@ function escapeJs(str) {
   return str.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"');
 }
 
-// ==================== 图片上传（Markdown 编辑器） ====================
-async function uploadImageForField(inputEl, textareaId) {
+// ==================== 图片上传（Markdown 编辑器 / Image 字段） ====================
+async function uploadImageForField(inputEl, textareaId, isImageField) {
   const file = inputEl.files[0];
   if (!file) return;
 
-  const statusEl = document.getElementById(`img-status-${textareaId.replace('f_', '')}`);
+  const fieldName = textareaId.replace('f_', '');
+  const statusEl = document.getElementById(`img-status-${fieldName}`);
   if (statusEl) statusEl.textContent = '⏳ 上传中...';
 
   const formData = new FormData();
@@ -829,14 +850,24 @@ async function uploadImageForField(inputEl, textareaId) {
     const result = await res.json();
 
     if (result.success) {
-      // 在光标位置或末尾插入 Markdown 图片语法
-      const ta = document.getElementById(textareaId);
-      const imgMd = `\n![${file.name}](${result.url})\n`;
-      const pos = ta.selectionStart;
-      ta.value = ta.value.slice(0, pos) + imgMd + ta.value.slice(pos.selectionEnd ?? pos);
-      ta.focus();
-      ta.setSelectionRange(pos + imgMd.length, pos + imgMd.length);
-      if (statusEl) statusEl.textContent = '✅ 图片已插入';
+      if (isImageField) {
+        // Image 字段：存路径到 hidden input + 显示预览
+        document.getElementById(textareaId).value = result.url;
+        const previewWrap = document.getElementById(`img-preview-wrap-${fieldName}`);
+        if (previewWrap) {
+          previewWrap.innerHTML = `<img src="${result.url.startsWith('http') ? result.url : '../' + result.url}" style="max-width:100%;max-height:200px;border-radius:8px;border:1px solid var(--border);display:block;" alt="preview">`;
+        }
+        if (statusEl) statusEl.textContent = '✅ 图片已上传';
+      } else {
+        // Markdown 字段：插入 ![...](...) 语法到 textarea
+        const ta = document.getElementById(textareaId);
+        const imgMd = `\n![${file.name}](${result.url})\n`;
+        const pos = ta.selectionStart;
+        ta.value = ta.value.slice(0, pos) + imgMd + ta.value.slice(pos.selectionEnd ?? pos);
+        ta.focus();
+        ta.setSelectionRange(pos + imgMd.length, pos + imgMd.length);
+        if (statusEl) statusEl.textContent = '✅ 图片已插入';
+      }
     } else {
       showToast('error', '❌ ' + (result.error || '上传失败'));
       if (statusEl) statusEl.textContent = '❌ 上传失败';

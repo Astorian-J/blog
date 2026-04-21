@@ -107,6 +107,28 @@
         }
         .hero h1 { font-size: 31px; font-weight: 700; letter-spacing: 2px; margin-bottom: 12px; color: #fff; position: relative; }
         .hero p { font-size: 14.5px; color: rgba(255,255,255,0.55); max-width: 480px; margin: 0 auto; line-height: 1.7; position: relative; }
+        /* ===== 平衡推荐汇总入口按钮 ===== */
+        .bc-summary-btn {
+            display: inline-flex; flex-direction: column; align-items: center;
+            gap: 6px; padding: 22px 48px;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: #fff; border-radius: 16px; font-weight: 700;
+            text-decoration: none; transition: all 0.25s ease;
+            box-shadow: 0 4px 20px rgba(37,99,235,0.35), 0 2px 6px rgba(0,0,0,0.08);
+            position: relative; overflow: hidden;
+        }
+        .bc-summary-btn::before {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.12), transparent);
+            pointer-events: none;
+        }
+        .bc-summary-btn:hover {
+            transform: translateY(-2px); box-shadow: 0 8px 30px rgba(37,99,235,0.45), 0 4px 10px rgba(0,0,0,0.1);
+            color: #fff;
+        }
+        .bc-btn-zh { font-size: 20px; letter-spacing: 1.5px; line-height: 1.35; }
+        .bc-btn-en { font-size: 13px; opacity: 0.75; font-weight: 500; letter-spacing: 0.5px; }
+
         /* ===== 板块通用 ===== */
         .section { margin-bottom: 42px; }
         .section-header {
@@ -396,6 +418,15 @@
             <p data-i18n="hero_desc">记录每一次社区平衡投票，用数据见证昆特环境的变迁</p>
         </section>
 
+        <!-- 平衡推荐汇总入口按钮 -->
+        <div style="text-align:center; margin-bottom:36px; padding:0 20px;">
+            <a href="bc-summary.html"
+               class="bc-summary-btn">
+                <span class="bc-btn-zh">本月国内外平衡推荐汇总</span>
+                <span class="bc-btn-en">This month's Gwent BC</span>
+            </a>
+        </div>
+
         <!-- 板块一：最新平衡资讯 — 2×2矩阵 -->
         <section class="section" id="news">
             <div class="section-header">
@@ -492,6 +523,7 @@
                 hero_title: '中国社区昆特平衡数据库',
                 hero_desc: '记录每一次社区平衡投票，用数据见证昆特环境的变迁',
                 sec_news: '最新平衡资讯', sec_news_sub: 'Latest News',
+                bc_btn_zh: '本月国内外平衡推荐汇总', bc_btn_en: "This month's Gwent BC",
                 sec_articles: '文章发布', sec_articles_sub: 'Articles',
                 sec_data: '每月问卷数据', sec_data_sub: 'Survey Data',
                 sec_videos: '每月平衡推荐视频', sec_videos_sub: 'Balance Videos',
@@ -512,6 +544,7 @@
                 hero_title: 'CN Community Gwent Balance Database',
                 hero_desc: 'Tracking every community balance vote, witnessing meta evolution through data.',
                 sec_news: 'Latest Balance News', sec_news_sub: 'Latest News',
+                bc_btn_zh: 'This month\'s Gwent BC Summary', bc_btn_en: "This month's Gwent BC",
                 sec_articles: 'Articles', sec_articles_sub: 'Articles',
                 sec_data: 'Monthly Survey Data', sec_data_sub: 'Survey Data',
                 sec_videos: 'Balance Recommendation Videos', sec_videos_sub: 'Videos',
