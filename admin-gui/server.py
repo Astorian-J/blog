@@ -88,10 +88,8 @@ COLLECTIONS = {
     "bc-recommendations": {
         "label": "🎯 平衡推荐汇总",
         "folder": "bc-recommendations",
-        "slug_format": "{year}-{month}-{day}-{author}",
+        "slug_format": "{year}-{month}-{day}",
         "fields": [
-            {"name": "author", "label": "推荐人", "type": "text", "required": True},
-            {"name": "community", "label": "社区", "type": "select", "options": ["中国社区", "俄罗斯/独联体", "欧美社区", "其他"]},
             {"name": "image", "label": "推荐截图", "type": "image"},
         ],
     },

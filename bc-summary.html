@@ -8,196 +8,99 @@
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
             --bg: #fafafa;
-            --card-bg: #ffffff;
-            --text-primary: #1a1a1a;
-            --text-secondary: #555555;
-            --text-muted: #999999;
             --accent: #2563eb;
-            --accent-hover: #1d4ed8;
             --border: #e5e5e5;
             --nav-bg: rgba(255,255,255,0.92);
-            --cn-color: #dc2626;
-            --other-color: #2563eb;
         }
         html { scroll-behavior: smooth; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-            background: var(--bg); color: var(--text-primary); line-height: 1.7; min-height: 100vh;
+            background: var(--bg); color: #1a1a1a; line-height: 1.6; min-height: 100vh;
         }
 
-        /* ===== 导航栏 ===== */
+        /* 导航栏 */
         .navbar {
-            position: fixed; top: 0; left: 0; right: 0; height: 60px;
+            position: fixed; top: 0; left: 0; right: 0; height: 56px;
             background: var(--nav-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--border); display: flex; align-items: center;
             justify-content: space-between; padding: 0 40px; z-index: 1000;
         }
-        .logo { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
+        .logo { font-size: 18px; font-weight: 700; letter-spacing: -0.5px; text-decoration: none; color: #1a1a1a; }
         .logo span { color: var(--accent); }
-        .logo a:hover { color: inherit; }
-        .nav-links { display: flex; gap: 24px; font-size: 14.5px; font-weight: 500; color: var(--text-secondary); }
+        .nav-links { display: flex; gap: 24px; font-size: 14px; font-weight: 500; color: #555; }
         .nav-links a { text-decoration: none; color: inherit; transition: color 0.2s; }
         .nav-links a:hover { color: var(--accent); }
 
-        /* ===== 主内容区 ===== */
-        .main-content { max-width: 1100px; margin: 0 auto; padding: 90px 24px 60px; }
+        /* 主内容 */
+        .main-content { max-width: 1100px; margin: 0 auto; padding: 80px 24px 48px; }
 
-        /* ===== 页面标题 ===== */
-        .page-title-area { text-align: center; margin-bottom: 40px; }
-        .page-title { font-size: 28px; font-weight: 700; color: var(--text-primary); margin-bottom: 6px; }
-        .page-subtitle { font-size: 15px; color: var(--text-muted); }
+        /* 标题区 */
+        .page-title-area { text-align: center; margin-bottom: 28px; }
+        .page-title { font-size: 26px; font-weight: 700; color: #1a1a1a; margin-bottom: 4px; }
+        .page-subtitle { font-size: 14.5px; color: #999; }
         .month-badge {
             display: inline-block; padding: 4px 18px; border-radius: 20px;
             background: linear-gradient(135deg, var(--accent), #3b82f6);
-            color: #fff; font-size: 15px; font-weight: 600; margin-top: 10px;
+            color: #fff; font-size: 14.5px; font-weight: 600; margin-top: 8px;
         }
 
-        /* ===== 两栏布局 ===== */
-        .bc-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
-        @media (max-width: 800px) { .bc-columns { grid-template-columns: 1fr; } }
-
-        /* ===== 社区卡片 ===== */
-        .community-card {
-            background: var(--card-bg); border-radius: 16px;
-            border: 1px solid var(--border); overflow: hidden;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.04);
-        }
-        .cc-header {
-            display: flex; align-items: center; gap: 10px;
-            padding: 20px 24px 16px; border-bottom: 1px solid var(--border);
-        }
-        .cc-dot {
-            width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0;
-        }
-        .cc-dot.cn { background: var(--cn-color); }
-        .cc-dot.other { background: var(--other-color); }
-        .cc-title { font-size: 19px; font-weight: 700; }
-        .cc-body { padding: 16px 24px 24px; min-height: 200px; }
-
-        /* ===== 推荐卡片项 ===== */
-        .rec-item {
-            border: 1px solid var(--border); border-radius: 12px;
-            padding: 16px; margin-bottom: 16px;
-            transition: box-shadow 0.2s, transform 0.2s;
-            background: #fcfcfc;
-        }
-        .rec-item:last-child { margin-bottom: 0; }
-        .rec-item:hover { box-shadow: 0 4px 14px rgba(0,0,0,0.08); transform: translateY(-1px); }
-        .rec-author {
-            font-size: 13px; font-weight: 600; color: var(--accent);
-            margin-bottom: 10px; display: flex; align-items: center; gap: 6px;
-        }
-        .rec-author::before {
-            content: ''; width: 22px; height: 22px; border-radius: 50%;
-            background: linear-gradient(135deg, var(--accent), #93c5fd);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 11px; color: #fff; line-height: 22px; text-align: center;
-            flex-shrink: 0;
-        }
-        .rec-img-wrap {
-            border-radius: 8px; overflow: hidden; border: 1px solid var(--border);
-            cursor: pointer; position: relative; background: #f0f0f0;
-        }
-        .rec-img-wrap img {
-            width: 100%; display: block; object-fit: cover;
-            max-height: 400px; transition: opacity 0.25s;
-        }
-        .rec-img-wrap img:hover { opacity: 0.92; }
-        .img-placeholder {
-            width: 100%; aspect-ratio: 16/9; display: flex;
-            align-items: center; justify-content: center;
-            color: var(--text-muted); font-size: 13px;
-            background: repeating-linear-gradient(45deg, #f5f5f5, #f5f5f5 10px, #eee 10px, #eee 20px);
-        }
-
-        /* ===== 空状态 ===== */
-        .empty-state {
-            text-align: center; padding: 48px 20px; color: var(--text-muted);
-            font-size: 14.5px;
-        }
-        .empty-state-icon { font-size: 40px; margin-bottom: 12px; opacity: 0.35; }
-
-        /* ===== 返回按钮 ===== */
         .back-link {
             display: inline-flex; align-items: center; gap: 6px;
-            font-size: 14px; color: var(--accent); font-weight: 500;
-            margin-bottom: 24px; transition: opacity 0.2s;
+            font-size: 13.5px; color: var(--accent); font-weight: 500;
+            margin-bottom: 20px; transition: opacity 0.2s; text-decoration: none;
         }
-        .back-link:hover { opacity: 0.75; }
+        .back-link:hover { opacity: 0.7; }
 
-        /* ===== 页脚 ===== */
+        /* 图片容器 — 铺满 */
+        .image-container {
+            width: 100%; border-radius: 12px; overflow: hidden;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.08); background: #f0f0f0;
+        }
+        .image-container img {
+            display: block; width: 100%; height: auto;
+        }
+
+        /* 空状态 */
+        .empty-state {
+            text-align: center; padding: 80px 24px; color: #999; font-size: 14.5px;
+        }
+
         footer {
-            text-align: center; padding: 28px 24px; font-size: 12.5px;
-            color: var(--text-muted); border-top: 1px solid var(--border);
-            margin-top: 40px;
+            text-align: center; padding: 24px; font-size: 12px;
+            color: #bbb; border-top: 1px solid var(--border);
+            margin-top: 32px;
         }
 
-        /* ===== 响应式 ===== */
         @media (max-width: 640px) {
             .navbar { padding: 0 20px; }
-            .main-content { padding: 80px 16px 40px; }
-            .page-title { font-size: 23px; }
-            .cc-header { padding: 16px 16px 12px; }
-            .cc-body { padding: 12px 16px 18px; }
-            .rec-item { padding: 12px; }
-            .nav-links { gap: 14px; font-size: 13px; }
+            .main-content { padding: 72px 16px 36px; }
+            .page-title { font-size: 22px; }
         }
     </style>
 </head>
 <body>
 
-<!-- 导航栏 -->
 <nav class="navbar">
-    <div class="logo"><a href="./">昆特<span>平衡数据库</span></a></div>
+    <div class="logo"><a href="./" style="text-decoration:none;color:inherit;">昆特<span>平衡数据库</span></a></div>
     <div class="nav-links">
         <a href="./">首页</a>
-        <a href="#cn-community">中国社区</a>
-        <a href="#other-community">其他社区</a>
     </div>
 </nav>
 
-<!-- 主内容 -->
 <main class="main-content">
 
-    <!-- 返回按钮 -->
     <a href="./" class="back-link">&larr; 返回首页</a>
 
-    <!-- 标题区域 -->
     <div class="page-title-area">
         <h1 class="page-title">平衡推荐汇总</h1>
         <p class="page-subtitle" id="seasonLabel"></p>
         <span class="month-badge" id="monthBadge"></span>
     </div>
 
-    <!-- 两栏：中国社区 / 其他社区 -->
-    <div class="bc-columns">
+    <div id="imageArea"></div>
 
-        <!-- 中国社区 -->
-        <div class="community-card" id="cn-community">
-            <div class="cc-header">
-                <div class="cc-dot cn"></div>
-                <h2 class="cc-title">中国社区</h2>
-            </div>
-            <div class="cc-body" id="cnList">
-                <!-- JS动态渲染 -->
-            </div>
-        </div>
-
-        <!-- 其他社区 -->
-        <div class="community-card" id="other-community">
-            <div class="cc-header">
-                <div class="cc-dot other"></div>
-                <h2 class="cc-title">其他社区</h2>
-            </div>
-            <div class="cc-body" id="otherList">
-                <!-- JS动态渲染 -->
-            </div>
-        </div>
-
-    </div>
 </main>
 
-<!-- 页脚 -->
 <footer>
     <p>&copy; 2026 中国社区昆特平衡数据库</p>
 </footer>
@@ -209,102 +112,45 @@
     const year = now.getFullYear();
     const month = now.getMonth() + 1;
     const monthNames = ['一','二','三','四','五','六','七','八','九','十','十一','十二'];
-
-    document.getElementById('seasonLabel').textContent =
-        `${year}年${monthNames[month-1]}月赛季`;
-    document.getElementById('monthBadge').textContent =
-        `${year}.${String(month).padStart(2,'0')}`;
+    document.getElementById('seasonLabel').textContent = `${year}年${monthNames[month-1]}月赛季`;
+    document.getElementById('monthBadge').textContent = `${year}.${String(month).padStart(2,'0')}`;
 })();
 
-// ===== 加载推荐数据（不依赖 manifest，直接扫描文件）=====
-(async function loadBCData() {
-    // 尝试多个可能的日期（当月及上月），构建文件名模式去探测
+// ===== 加载最新图片 =====
+(async function loadImage() {
+    const container = document.getElementById('imageArea');
+
+    // 扫描最近的文件（按日期倒序，找到第一个有图片的）
     const now = new Date();
-    const months = [];
-    for (let i = 0; i < 3; i++) {
-        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-        months.push(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`);
-    }
-
-    // 已知文件名格式：{year}-{month}-{day}-{author}.md，扫描最近3个月的所有可能日期
     const candidates = [];
-    for (const m of months) {
-        const [y, mo] = m.split('-');
-        const daysInMonth = new Date(parseInt(y), parseInt(mo), 0).getDate();
-        for (let d = daysInMonth; d >= 1; d--) {
-            candidates.push(`content/bc-recommendations/${m}-${String(d).padStart(2,'0')}-*.md`);
-        }
+    for (let i = 0; i < 15; i++) {
+        const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
+        const ds = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        candidates.push(`content/bc-recommendations/${ds}.md`);
     }
 
-    // 直接用已知的完整路径尝试（最可靠）
-    const directFiles = [];
-    const prefixes = ['2026-04-21-', '2026-04-20-', '2026-04-19-', '2026-04-18-'];
-    const authors = ['zong', 'md', 'test', 'unknown'];
-    for (const prefix of prefixes) {
-        for (const author of authors) {
-            directFiles.push(`content/bc-recommendations/${prefix}${author}.md`);
-        }
-    }
-
-    // 合并：先试已知精确文件名，再试日期范围扫描
-    const allCandidates = [...directFiles];
-    
-    const files = [];
-    
-    // 并发探测所有候选文件（限制并发数）
-    const batchSize = 10;
-    for (let i = 0; i < allCandidates.length; i += batchSize) {
-        const batch = allCandidates.slice(i, i + batchSize);
-        const results = await Promise.allSettled(
-            batch.map(async (f) => {
-                try {
-                    const r = await fetch('./' + f);
-                    if (r.ok) return f;
-                } catch(e) {}
-                return null;
-            })
-        );
-        for (const r of results) {
-            if (r.status === 'fulfilled' && r.value) files.push(r.value);
-        }
-        if (files.length > 0) break; // 找到就停止扫描
-    }
-
-    console.log(`[BC] 扫描完成，找到 ${files.length} 个文件:`, files);
-        if (files.length === 0) {
-            renderEmpty('cnList');
-            renderEmpty('otherList');
-            return;
-        }
-
-        // 逐个读取每个 .md 文件的 frontmatter
-        const items = [];
-        for (const f of files) {
-            try {
-                const r = await fetch('./' + f);
-                if (!r.ok) continue;
-                const text = await r.text();
-                const { frontmatter } = parseFM(text);
-                if (frontmatter.author) {
-                    items.push({
-                        author: frontmatter.author,
-                        community: frontmatter.community || '',
-                        image: frontmatter.image || '',
-                    });
+    for (const f of candidates) {
+        try {
+            const r = await fetch('./' + f);
+            if (!r.ok) continue;
+            const text = await r.text();
+            const fm = parseFM(text).frontmatter;
+            if (fm.image) {
+                // 标准化路径
+                let src = fm.image.trim();
+                if (src && !src.startsWith('http') && !src.startsWith('//')) {
+                    src = src.replace(/^\.\.\//, '').replace(/^\.\//, '');
                 }
-            } catch(e) { /* skip */ }
-        }
-
-        // 按社区分组
-        const cnItems = items.filter(i => i.community === '中国社区' || i.community === 'CN');
-        const otherItems = items.filter(i => i.community !== '中国社区' && i.community !== 'CN');
-
-        renderList('cnList', cnItems);
-        renderList('otherList', otherItems);
-    } catch(e) {
-        renderEmpty('cnList');
-        renderEmpty('otherList');
+                if (src) {
+                    container.innerHTML = `<div class="image-container"><img src="${src}" alt="平衡推荐截图" loading="lazy"></div>`;
+                    return;
+                }
+            }
+        } catch(e) {}
     }
+
+    // 没有图片
+    container.innerHTML = `<div class="empty-state">暂无本月推荐图片</div>`;
 })();
 
 function parseFM(content) {
@@ -323,44 +169,6 @@ function parseFM(content) {
         fm[key] = val;
     }
     return { frontmatter: fm, body };
-}
-
-function renderList(containerId, items) {
-    const container = document.getElementById(containerId);
-    if (!items || items.length === 0) {
-        renderEmpty(containerId);
-        return;
-    }
-
-    // 标准化图片路径：确保从站点根目录可访问
-    function normalizePath(p) {
-        if (!p) return '';
-        // 已是完整URL或绝对路径
-        if (p.startsWith('http://') || p.startsWith('https://') || p.startsWith('/')) return p;
-        // 去掉开头的 ./ 或 ../
-        p = p.replace(/^\.\//, '');
-        return p;
-    }
-
-    container.innerHTML = items.map(item => {
-        const imgSrc = normalizePath(item.image);
-        return `
-        <div class="rec-item">
-            <div class="rec-author">${item.author || '未知推荐人'}</div>
-            <div class="rec-img-wrap" onclick="if(this.dataset.src) window.open(this.dataset.src,'_blank')" data-src="${imgSrc}">
-                ${imgSrc ? `<img src="${imgSrc}" alt="${item.author}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=\\'img-placeholder\\'>图片加载失败</div>'">` : '<div class="img-placeholder">暂无图片</div>'}
-            </div>
-        </div>
-    `;
-    }).join('');
-}
-
-function renderEmpty(containerId) {
-    document.getElementById(containerId).innerHTML = `
-        <div class="empty-state">
-            <div class="empty-state-icon">&#128196;</div>
-            暂无本月推荐数据
-        </div>`;
 }
 </script>
 
