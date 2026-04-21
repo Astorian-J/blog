@@ -18,7 +18,6 @@
             background: var(--bg); color: #1a1a1a; line-height: 1.6; min-height: 100vh;
         }
 
-        /* 导航栏 */
         .navbar {
             position: fixed; top: 0; left: 0; right: 0; height: 56px;
             background: var(--nav-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
@@ -31,10 +30,8 @@
         .nav-links a { text-decoration: none; color: inherit; transition: color 0.2s; }
         .nav-links a:hover { color: var(--accent); }
 
-        /* 主内容 */
         .main-content { max-width: 1100px; margin: 0 auto; padding: 80px 24px 48px; }
 
-        /* 标题区 */
         .page-title-area { text-align: center; margin-bottom: 28px; }
         .page-title { font-size: 26px; font-weight: 700; color: #1a1a1a; margin-bottom: 4px; }
         .page-subtitle { font-size: 14.5px; color: #999; }
@@ -51,19 +48,13 @@
         }
         .back-link:hover { opacity: 0.7; }
 
-        /* 图片容器 — 铺满 */
         .image-container {
             width: 100%; border-radius: 12px; overflow: hidden;
             box-shadow: 0 2px 16px rgba(0,0,0,0.08); background: #f0f0f0;
         }
-        .image-container img {
-            display: block; width: 100%; height: auto;
-        }
+        .image-container img { display: block; width: 100%; height: auto; }
 
-        /* 空状态 */
-        .empty-state {
-            text-align: center; padding: 80px 24px; color: #999; font-size: 14.5px;
-        }
+        .empty-state { text-align: center; padding: 80px 24px; color: #999; font-size: 14.5px; }
 
         footer {
             text-align: center; padding: 24px; font-size: 12px;
@@ -82,9 +73,7 @@
 
 <nav class="navbar">
     <div class="logo"><a href="./" style="text-decoration:none;color:inherit;">昆特<span>平衡数据库</span></a></div>
-    <div class="nav-links">
-        <a href="./">首页</a>
-    </div>
+    <div class="nav-links"><a href="./">首页</a></div>
 </nav>
 
 <main class="main-content">
@@ -101,75 +90,70 @@
 
 </main>
 
-<footer>
-    <p>&copy; 2026 中国社区昆特平衡数据库</p>
-</footer>
+<footer><p>&copy; 2026 中国社区昆特平衡数据库</p></footer>
 
 <script>
-// ===== 月份自动更新 =====
+/* ===== 月份自动更新 ===== */
 (function setMonthTitle() {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = now.getMonth() + 1;
-    const monthNames = ['一','二','三','四','五','六','七','八','九','十','十一','十二'];
-    document.getElementById('seasonLabel').textContent = `${year}年${monthNames[month-1]}月赛季`;
-    document.getElementById('monthBadge').textContent = `${year}.${String(month).padStart(2,'0')}`;
+    var now = new Date();
+    var year = now.getFullYear();
+    var month = now.getMonth() + 1;
+    var monthNames = ['一','二','三','四','五','六','七','八','九','十','十一','十二'];
+    document.getElementById('seasonLabel').textContent = year + '年' + monthNames[month-1] + '月赛季';
+    document.getElementById('monthBadge').textContent = year + '.' + String(month).padStart(2,'0');
 })();
 
-// ===== 加载最新图片 =====
-(async function loadImage() {
-    const container = document.getElementById('imageArea');
+/* ===== 加载最新图片（manifest优先策略）=====
+   读取 manifest.json → 拿到 bc-recommendations 文件列表 → fetch 最新 MD → 提取 image 路径
+*/
+(function loadImage() {
+    var container = document.getElementById('imageArea');
 
-    // 扫描最近的文件（按日期倒序，找到第一个有图片的）
-    const now = new Date();
-    const candidates = [];
-    for (let i = 0; i < 15; i++) {
-        const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
-        const ds = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-        candidates.push(`content/bc-recommendations/${ds}.md`);
+    function showImage(src) {
+        container.innerHTML = '<div class="image-container"><img src="' + src + '" alt="平衡推荐截图" loading="lazy"></div>';
+    }
+    function showEmpty() {
+        container.innerHTML = '<div class="empty-state">暂无本月推荐图片</div>';
     }
 
-    for (const f of candidates) {
-        try {
-            const r = await fetch('./' + f);
-            if (!r.ok) continue;
-            const text = await r.text();
-            const fm = parseFM(text).frontmatter;
-            if (fm.image) {
-                // 标准化路径
-                let src = fm.image.trim();
-                if (src && !src.startsWith('http') && !src.startsWith('//')) {
-                    src = src.replace(/^\.\.\//, '').replace(/^\.\//, '');
-                }
-                if (src) {
-                    container.innerHTML = `<div class="image-container"><img src="${src}" alt="平衡推荐截图" loading="lazy"></div>`;
-                    return;
-                }
+    /* 从 Markdown 原文提取 frontmatter 中的 image 字段 */
+    function extractImage(text) {
+        var fmMatch = text.match(/^---[\s\S]*?^---/m);
+        if (!fmMatch) return null;
+        var imgMatch = fmMatch[0].match(/^[ \t]*image[ \t]*:[ \t]*(.+)$/m);
+        if (!imgMatch) return null;
+        var src = imgMatch[1].trim().replace(/^["']|["']$/g, '');
+        if (src && !src.startsWith('http') && !src.startsWith('//')) {
+            src = src.replace(/^\.\.\//, '').replace(/^\.\//, '');
+        }
+        return src || null;
+    }
+
+    /* fetch 单个 MD 文件并提取图片路径 */
+    function fetchMDFile(path) {
+        return fetch('./' + path).then(function(r) {
+            if (!r.ok) throw new Error('not found');
+            return r.text();
+        }).then(extractImage);
+    }
+
+    /* 主流程：manifest.json → 取文件列表 → 加载最新 MD */
+    fetch('./content/manifest.json')
+        .then(function(r) { return r.ok ? r.json() : null; })
+        .then(function(manifest) {
+            if (!manifest || !manifest['bc-recommendations'] || !manifest['bc-recommendations'].length) {
+                throw new Error('no data in manifest');
             }
-        } catch(e) {}
-    }
-
-    // 没有图片
-    container.innerHTML = `<div class="empty-state">暂无本月推荐图片</div>`;
+            var files = manifest['bc-recommendations'];
+            // 取最后一个（最新的）文件
+            return fetchMDFile(files[files.length - 1]);
+        })
+        .then(function(src) {
+            if (src) showImage(src);
+            else showEmpty();
+        })
+        .catch(showEmpty);
 })();
-
-function parseFM(content) {
-    if (!content.startsWith('---')) return { frontmatter: {}, body: content };
-    const end = content.indexOf('---', 3);
-    if (end < 0) return { frontmatter: {}, body: content };
-    const fmText = content.slice(3, end).trim();
-    const body = content.slice(end + 3).trim();
-    const fm = {};
-    for (const line of fmText.split('\n')) {
-        if (!line.includes(':')) continue;
-        let [key, val] = line.split(':', 1);
-        key = key.trim().toLowerCase();
-        val = val.trim();
-        if (val.startsWith('"') && val.endsWith('"')) val = val.slice(1, -1);
-        fm[key] = val;
-    }
-    return { frontmatter: fm, body };
-}
 </script>
 
 </body>
