@@ -286,14 +286,28 @@ function renderList(containerId, items) {
         renderEmpty(containerId);
         return;
     }
-    container.innerHTML = items.map(item => `
+
+    // 标准化图片路径：确保从站点根目录可访问
+    function normalizePath(p) {
+        if (!p) return '';
+        // 已是完整URL或绝对路径
+        if (p.startsWith('http://') || p.startsWith('https://') || p.startsWith('/')) return p;
+        // 去掉开头的 ./ 或 ../
+        p = p.replace(/^\.\//, '');
+        return p;
+    }
+
+    container.innerHTML = items.map(item => {
+        const imgSrc = normalizePath(item.image);
+        return `
         <div class="rec-item">
             <div class="rec-author">${item.author || '未知推荐人'}</div>
-            <div class="rec-img-wrap" onclick="this.querySelector('img') && window.open(this.dataset.src||'', '_blank')">
-                ${item.image ? `<img src="${item.image}" alt="${item.author}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=\\'img-placeholder\\'>图片加载失败</div>'">` : '<div class="img-placeholder">暂无图片</div>'}
+            <div class="rec-img-wrap" onclick="if(this.dataset.src) window.open(this.dataset.src,'_blank')" data-src="${imgSrc}">
+                ${imgSrc ? `<img src="${imgSrc}" alt="${item.author}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=\\'img-placeholder\\'>图片加载失败</div>'">` : '<div class="img-placeholder">暂无图片</div>'}
             </div>
         </div>
-    `).join('');
+    `;
+    }).join('');
 }
 
 function renderEmpty(containerId) {

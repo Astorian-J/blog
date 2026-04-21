@@ -108,16 +108,36 @@ def slugify(text):
     return text
 
 
-def generate_slug(collection_name, title, date_str):
-    """根据分类规则生成文件名"""
+def generate_slug(collection_name, data, date_str):
+    """根据分类规则生成文件名，支持所有字段占位符"""
     col = COLLECTIONS[collection_name]
     fmt = col["slug_format"]
     dt = datetime.strptime(date_str[:10], "%Y-%m-%d") if date_str else datetime.now()
-    s = slugify(title) if title else "untitled"
+
+    # 先替换日期相关占位符
     result = fmt.replace("{year}", str(dt.year))
     result = result.replace("{month}", f"{dt.month:02d}")
     result = result.replace("{day}", f"{dt.day:02d}")
+
+    # 替换 slug（用 title 或首个文本字段）
+    title_text = data.get('title', '') or ''
+    if not title_text:
+        # 找第一个有值的文本类字段作为 fallback
+        for f in col.get("fields", []):
+            v = data.get(f["name"], '')
+            if v and f["type"] in ("text", "select"):
+                title_text = str(v)
+                break
+    s = slugify(title_text) if title_text else "untitled"
     result = result.replace("{slug}", s)
+
+    # 替换其他字段占位符（如 {author}）
+    for f in col.get("fields", []):
+        placeholder = "{" + f["name"] + "}"
+        if placeholder in result:
+            val = data.get(f["name"], "")
+            result = result.replace(placeholder, slugify(str(val)) if val else "unknown")
+
     return result
 
 
@@ -444,14 +464,13 @@ class AdminHandler(SimpleHTTPRequestHandler):
         # API: 新增内容
         if path == '/api/add':
             col_name = data.get('collection')
-            title = data.get('title', '')
             date_str = data.get('date', datetime.now().strftime('%Y-%m-%d'))
             
             if not col_name or col_name not in COLLECTIONS:
                 self.send_json({'error': '无效的分类'}, status=400)
                 return
             
-            filename = generate_slug(col_name, title, date_str) + '.md'
+            filename = generate_slug(col_name, data, date_str) + '.md'
             body = data.get('body', '')
             file_path = save_file(col_name, filename, data, body)
             self.send_json({'success': True, 'file': file_path, 'message': f'已创建 {filename}'})
