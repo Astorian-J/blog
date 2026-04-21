@@ -17,7 +17,6 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
             background: var(--bg); color: #1a1a1a; line-height: 1.6; min-height: 100vh;
         }
-
         .navbar {
             position: fixed; top: 0; left: 0; right: 0; height: 56px;
             background: var(--nav-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
@@ -29,9 +28,7 @@
         .nav-links { display: flex; gap: 24px; font-size: 14px; font-weight: 500; color: #555; }
         .nav-links a { text-decoration: none; color: inherit; transition: color 0.2s; }
         .nav-links a:hover { color: var(--accent); }
-
         .main-content { max-width: 1100px; margin: 0 auto; padding: 80px 24px 48px; }
-
         .page-title-area { text-align: center; margin-bottom: 28px; }
         .page-title { font-size: 26px; font-weight: 700; color: #1a1a1a; margin-bottom: 4px; }
         .page-subtitle { font-size: 14.5px; color: #999; }
@@ -40,28 +37,22 @@
             background: linear-gradient(135deg, var(--accent), #3b82f6);
             color: #fff; font-size: 14.5px; font-weight: 600; margin-top: 8px;
         }
-
         .back-link {
             display: inline-flex; align-items: center; gap: 6px;
             font-size: 13.5px; color: var(--accent); font-weight: 500;
             margin-bottom: 20px; transition: opacity 0.2s; text-decoration: none;
         }
         .back-link:hover { opacity: 0.7; }
-
         .image-container {
             width: 100%; border-radius: 12px; overflow: hidden;
             box-shadow: 0 2px 16px rgba(0,0,0,0.08); background: #f0f0f0;
         }
         .image-container img { display: block; width: 100%; height: auto; }
-
         .empty-state { text-align: center; padding: 80px 24px; color: #999; font-size: 14.5px; }
-
         footer {
             text-align: center; padding: 24px; font-size: 12px;
-            color: #bbb; border-top: 1px solid var(--border);
-            margin-top: 32px;
+            color: #bbb; border-top: 1px solid var(--border); margin-top: 32px;
         }
-
         @media (max-width: 640px) {
             .navbar { padding: 0 20px; }
             .main-content { padding: 72px 16px 36px; }
@@ -86,73 +77,100 @@
         <span class="month-badge" id="monthBadge"></span>
     </div>
 
-    <div id="imageArea"></div>
+    <div id="imageArea"><div class="empty-state">加载中...</div></div>
 
 </main>
 
 <footer><p>&copy; 2026 中国社区昆特平衡数据库</p></footer>
 
 <script>
-/* ===== 月份自动更新 ===== */
-(function setMonthTitle() {
-    var now = new Date();
-    var year = now.getFullYear();
-    var month = now.getMonth() + 1;
-    var monthNames = ['一','二','三','四','五','六','七','八','九','十','十一','十二'];
-    document.getElementById('seasonLabel').textContent = year + '年' + monthNames[month-1] + '月赛季';
-    document.getElementById('monthBadge').textContent = year + '.' + String(month).padStart(2,'0');
+/* ====== 缓存破坏器 ====== */
+var _cb = '?_=' + Date.now();
+
+/* ====== 月份标题 ====== */
+(function() {
+    var n = new Date();
+    document.getElementById('seasonLabel').textContent =
+        n.getFullYear() + '年' + '一二三四五六七八九十十一'.charAt(n.getMonth()) + '月赛季';
+    document.getElementById('monthBadge').textContent =
+        n.getFullYear() + '.' + String(n.getMonth()+1).padStart(2,'0');
 })();
 
-/* ===== 加载最新图片（manifest优先策略）=====
-   读取 manifest.json → 拿到 bc-recommendations 文件列表 → fetch 最新 MD → 提取 image 路径
+/* ====== 核心加载逻辑 ======
+   数据链路：manifest.json → [文件列表] → 取最新 → fetch .md → 提取 image 字段 → 渲染
 */
-(function loadImage() {
-    var container = document.getElementById('imageArea');
+(function() {
+    var $ = function(id) { return document.getElementById(id); };
 
-    function showImage(src) {
-        container.innerHTML = '<div class="image-container"><img src="' + src + '" alt="平衡推荐截图" loading="lazy"></div>';
+    /* 从 Markdown 原文提取 image 字段 — 兼容多种格式 */
+    function extractImage(raw) {
+        // 尝试标准多行 YAML: ---\nimage: xxx\n---
+        var m = raw.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+        if (m) {
+            var im = m[1].match(/^\s*image\s*:\s*(.+)$/m);
+            if (im) return im[1].trim().replace(/^["']|["']$/g, '');
+        }
+
+        // 兼容单行: --- image: xxx ---
+        m = raw.match(/^---\s*(.+)\s*---/);
+        if (m) {
+            var parts = m[1].split(':');
+            if (parts.length >= 2 && parts[0].trim().toLowerCase() === 'image')
+                return parts.slice(1).join(':').trim().replace(/^["']|["']$/g, '');
+        }
+
+        // 宽松匹配：直接找 image: 开头的行
+        var loose = raw.match(/^\s*image\s*:\s*(.+)$/im);
+        if (loose) return loose[1].trim().replace(/^["']|["']$/g, '');
+
+        return null;
+    }
+
+    /* 标准化图片路径 */
+    function normPath(src) {
+        if (!src) return '';
+        src = src.trim();
+        if (src.indexOf('http') === 0 || src.indexOf('//') === 0) return src;
+        return src.replace(/^\.\.\//, '').replace(/^\.\//, '');
+    }
+
+    /* 显示图片 / 空状态 */
+    function showImg(src) {
+        $('imageArea').innerHTML =
+            '<div class="image-container"><img src="' + normPath(src) + '" alt="平衡推荐截图" loading="lazy"></div>';
     }
     function showEmpty() {
-        container.innerHTML = '<div class="empty-state">暂无本月推荐图片</div>';
+        $('imageArea').innerHTML = '<div class="empty-state">暂无本月推荐图片</div>';
     }
 
-    /* 从 Markdown 原文提取 frontmatter 中的 image 字段 */
-    function extractImage(text) {
-        var fmMatch = text.match(/^---[\s\S]*?^---/m);
-        if (!fmMatch) return null;
-        var imgMatch = fmMatch[0].match(/^[ \t]*image[ \t]*:[ \t]*(.+)$/m);
-        if (!imgMatch) return null;
-        var src = imgMatch[1].trim().replace(/^["']|["']$/g, '');
-        if (src && !src.startsWith('http') && !src.startsWith('//')) {
-            src = src.replace(/^\.\.\//, '').replace(/^\.\//, '');
-        }
-        return src || null;
+    /* fetch 单个 md 文件 */
+    function loadMD(path) {
+        return fetch(path + _cb)
+            .then(function(r) {
+                if (!r.ok) throw new Error(r.status);
+                return r.text();
+            });
     }
 
-    /* fetch 单个 MD 文件并提取图片路径 */
-    function fetchMDFile(path) {
-        return fetch('./' + path).then(function(r) {
-            if (!r.ok) throw new Error('not found');
-            return r.text();
-        }).then(extractImage);
-    }
-
-    /* 主流程：manifest.json → 取文件列表 → 加载最新 MD */
-    fetch('./content/manifest.json')
+    /* 主流程 */
+    fetch('content/manifest.json' + _cb)
         .then(function(r) { return r.ok ? r.json() : null; })
-        .then(function(manifest) {
-            if (!manifest || !manifest['bc-recommendations'] || !manifest['bc-recommendations'].length) {
-                throw new Error('no data in manifest');
-            }
-            var files = manifest['bc-recommendations'];
-            // 取最后一个（最新的）文件
-            return fetchMDFile(files[files.length - 1]);
+        .then(function(man) {
+            var files = man && man['bc-recommendations'];
+            if (!files || !files.length) throw new Error('EMPTY');
+
+            // 取最后一个（最新的）
+            return loadMD(files[files.length - 1]);
         })
-        .then(function(src) {
-            if (src) showImage(src);
+        .then(function(text) {
+            var src = extractImage(text);
+            if (src) showImg(src);
             else showEmpty();
         })
-        .catch(showEmpty);
+        .catch(function(e) {
+            console.error('[bc-summary] 加载失败:', e.message || e);
+            showEmpty();
+        });
 })();
 </script>
 
