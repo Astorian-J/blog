@@ -839,12 +839,7 @@
             container.querySelectorAll('.post-card[data-file]').forEach(card => {
                 card.addEventListener('click', () => {
                     const mdFile = card.dataset.file;
-                    // 从缓存数据中查找标题
-                    let title = '';
-                    for (const item of _articlesData) {
-                        if (item.file === mdFile) { title = item.fm.title || ''; break; }
-                    }
-                    goToArticle(mdFile, title);
+                    goToArticle(mdFile);
                 });
             });
             buildPagination('articles');
@@ -1048,24 +1043,22 @@
             } catch(e) { console.warn('Failed to open news:', e); }
         }
 
-        function goToArticle(mdFile, title) {
-            // 直接从标题构造静态页路径：posts/slug.html
-            // 不再依赖 manifest.articles_html（会被GitHub Actions覆盖）
-            const slug = titleToSlug(title || '');
-            if (slug) {
-                window.location.href = 'posts/' + slug + '.html';
+        function goToArticle(mdFile) {
+            // 从 manifest.articles_html 映射表中查找对应的静态页路径
+            const htmlMap = contentManifest.articles_html || {};
+            // 尝试用完整路径或纯文件名作为 key 查找
+            let targetPath = htmlMap[mdFile];
+            if (!targetPath) {
+                const fileName = mdFile.split('/').pop();
+                for (const [k, v] of Object.entries(htmlMap)) {
+                    if (k.endsWith(fileName) || k === fileName) { targetPath = v; break; }
+                }
+            }
+            if (targetPath) {
+                window.location.href = targetPath;
             } else {
                 openArticleModal(mdFile);
             }
-        }
-
-        function titleToSlug(title) {
-            if (!title) return '';
-            return title.toLowerCase()
-                .replace(/[^\w\u4e00-\u9fff\-]/g, '-')
-                .replace(/-+/g, '-')
-                .replace(/^-|-$/g, '')
-                || '';
         }
 
         async function openArticleModal(file) {
