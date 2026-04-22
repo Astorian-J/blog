@@ -172,10 +172,10 @@
         .submit-notice a { color: var(--accent); font-weight: 500; }
         .submit-notice a:hover { text-decoration: underline; }
 
-        /* ===== 资讯Q群提示 ===== */
+        /* ===== 资讯Q群提示（独立行） ===== */
         .news-qgroup-hint {
-            margin-left: auto; font-size: 12.5px; color: var(--text-muted);
-            white-space: nowrap; flex-shrink: 0;
+            text-align: center; font-size: 12.5px; color: var(--text-muted);
+            padding: 6px 0 10px; margin-bottom: 8px;
         }
         .news-qgroup-hint a { color: var(--accent); font-weight: 500; }
 
@@ -440,8 +440,8 @@
                 <div class="section-icon"></div>
                 <h2 class="section-title" data-i18n="sec_news">最新平衡资讯</h2>
                 <span class="section-subtitle" data-i18n="sec_news_sub">Latest News</span>
-                <span class="news-qgroup-hint" data-i18n="news_qgroup_hint">📮 平衡最新资讯、投稿请加Q群：<a href="https://jq.qq.com/?_wv=1027&k=XXXXXX" target="_blank" rel="noopener">1022244675</a></span>
             </div>
+            <div class="news-qgroup-hint">📮 平衡最新资讯、投稿请加Q群：<a href="https://jq.qq.com/?_wv=1027&k=XXXXXX" target="_blank" rel="noopener">1022244675</a></div>
             <div class="news-grid" id="newsGrid">
                 <!-- JS动态渲染 -->
             </div>
