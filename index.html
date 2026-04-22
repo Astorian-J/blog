@@ -172,6 +172,13 @@
         .submit-notice a { color: var(--accent); font-weight: 500; }
         .submit-notice a:hover { text-decoration: underline; }
 
+        /* ===== 资讯Q群提示 ===== */
+        .news-qgroup-hint {
+            margin-left: auto; font-size: 12.5px; color: var(--text-muted);
+            white-space: nowrap; flex-shrink: 0;
+        }
+        .news-qgroup-hint a { color: var(--accent); font-weight: 500; }
+
         /* ===== 分类筛选栏 ===== */
         .filter-bar {
             display: flex; gap: 8px; flex-wrap: wrap;
@@ -433,6 +440,7 @@
                 <div class="section-icon"></div>
                 <h2 class="section-title" data-i18n="sec_news">最新平衡资讯</h2>
                 <span class="section-subtitle" data-i18n="sec_news_sub">Latest News</span>
+                <span class="news-qgroup-hint" data-i18n="news_qgroup_hint">📮 平衡最新资讯、投稿请加Q群：<a href="https://jq.qq.com/?_wv=1027&k=XXXXXX" target="_blank" rel="noopener">1022244675</a></span>
             </div>
             <div class="news-grid" id="newsGrid">
                 <!-- JS动态渲染 -->
@@ -448,8 +456,6 @@
                 <h2 class="section-title" data-i18n="sec_articles">文章发布</h2>
                 <span class="section-subtitle" data-i18n="sec_articles_sub">Articles</span>
             </div>
-            <div class="submit-notice">
-                <span data-i18n="submit_notice">欢迎大家投稿文章，投稿邮箱：</span><a href="mailto:gwenttg@163.com">gwenttg@163.com</a>
             </div>
             <div class="filter-bar" id="articleFilterBar"></div>
             <div class="post-list" id="articleList">
@@ -530,7 +536,7 @@
                 tag_hot: 'HOT',
                 btn_view_img: '查看图表', btn_raw: '原始问卷', btn_stat: '统计结果', btn_video: '相关视频',
                 btn_source: '查看原文',
-                submit_notice: '欢迎大家投稿文章，投稿邮箱：',
+                news_qgroup_hint: '📮 平衡最新资讯、投稿请加Q群：<a href="https://jq.qq.com/?_wv=1027&k=XXXXXX" target="_blank" rel="noopener">1022244675</a>',
                 filter_all: '全部', filter_story: '故事', filter_guide: '教程',
                 filter_analysis: '分析', filter_chat: '杂谈', filter_profile: '平衡人物志',
                 footer_copyright: '&copy; 2026 中国社区昆特平衡数据库',
@@ -551,7 +557,7 @@
                 tag_hot: 'HOT',
                 btn_view_img: 'View Chart', btn_raw: 'Raw Data', btn_stat: 'Statistics', btn_video: 'Video',
                 btn_source: 'View Source',
-                submit_notice: 'Community submissions welcome, email to: ',
+                news_qgroup_hint: '📮 For BC news & submissions, join QQ Group: <a href="https://jq.qq.com/?_wv=1027&k=XXXXXX" target="_blank" rel="noopener">1022244675</a>',
                 filter_all: 'All', filter_story: 'Story', filter_guide: 'Guide',
                 filter_analysis: 'Analysis', filter_chat: 'Chat', filter_profile: 'Profile',
                 footer_copyright: '&copy; 2026 CN Community Gwent Balance Database',
