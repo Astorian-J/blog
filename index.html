@@ -631,6 +631,20 @@
             });
         });
 
+        // ===== URL Hash 自动切换 Tab =====
+        // 支持从文章详情页通过 ../#articles 返回时自动切换到文章 Tab
+        (function initHashTab() {
+            var h = location.hash.replace('#', '');
+            if (h && document.getElementById('panel-' + h)) {
+                switchTab(h);
+            }
+            // 监听浏览器前进/后退按钮
+            window.addEventListener('hashchange', function() {
+                var ht = location.hash.replace('#', '');
+                if (ht && document.getElementById('panel-' + ht)) switchTab(ht);
+            });
+        })();
+
         window.addEventListener('scroll', () => {
             const btn = document.getElementById('backToTop');
             if (window.scrollY > 400) btn.classList.add('show'); else btn.classList.remove('show');
