@@ -633,12 +633,10 @@
 
         // ===== URL Hash 自动切换 Tab =====
         // 支持从文章详情页通过 ../#articles 返回时自动切换到文章 Tab
+        // 必须等 manifest 加载完成后再处理 hash，否则读不到数据会渲染空白
+        let _pendingHash = location.hash.replace('#', '');
         (function initHashTab() {
-            var h = location.hash.replace('#', '');
-            if (h && document.getElementById('panel-' + h)) {
-                switchTab(h);
-            }
-            // 监听浏览器前进/后退按钮
+            // 延迟注册：先记录 hash，等 renderAllContent 完成后再切换
             window.addEventListener('hashchange', function() {
                 var ht = location.hash.replace('#', '');
                 if (ht && document.getElementById('panel-' + ht)) switchTab(ht);
@@ -716,6 +714,11 @@
         async function renderAllContent() {
             await loadManifest();
             await Promise.all([renderNews(), renderArticles(), renderSurveyData(), renderVideos()]);
+            // 处理从文章详情页返回时的 hash 切换（等数据就绪后再切）
+            if (_pendingHash && document.getElementById('panel-' + _pendingHash)) {
+                switchTab(_pendingHash);
+                _pendingHash = '';
+            }
         }
 
         // ========== 最新资讯（按日期倒序） ==========
