@@ -152,24 +152,62 @@ def generate_slug(collection_name, data, date_str):
 
 
 def parse_frontmatter(content):
-    """解析 Markdown 文件的 frontmatter"""
+    """解析 Markdown 文件的 frontmatter（支持多行引号值）"""
     if content.startswith('---'):
         end = content.find('---', 3)
         if end > 0:
             fm_text = content[3:end].strip()
             body = content[end+3:].strip()
             fm = {}
-            for line in fm_text.split('\n'):
+            i = 0
+            lines = fm_text.split('\n')
+            while i < len(lines):
+                line = lines[i]
+                # 跳过空行
+                if not line.strip():
+                    i += 1
+                    continue
                 if ':' in line:
                     key, val = line.split(':', 1)
-                    val = val.strip().strip('"').strip("'")
-                    if val.lower() == 'true':
+                    key = key.strip()
+                    val_stripped = val.strip()
+                    # 检测是否是双引号开头的多行值
+                    if val_stripped.startswith('"') and not val_stripped.endswith('"'):
+                        # 多行字符串：收集直到找到结尾的 "
+                        parts = [val_stripped]  # 保留开头的引号
+                        i += 1
+                        while i < len(lines):
+                            parts.append(lines[i])
+                            if lines[i].rstrip().endswith('"'):
+                                break
+                            i += 1
+                        full_val = '\n'.join(parts)
+                        # 去掉首尾引号
+                        val = full_val[1:-1].strip() if full_val.endswith('"') else full_val[1:].strip()
+                    elif val_stripped.startswith("'") and not val_stripped.endswith("'"):
+                        # 单引号多行值（同理）
+                        parts = [val_stripped]
+                        i += 1
+                        while i < len(lines):
+                            parts.append(lines[i])
+                            if lines[i].rstrip().endswith("'"):
+                                break
+                            i += 1
+                        full_val = '\n'.join(parts)
+                        val = full_val[1:-1].strip() if full_val.endswith("'") else full_val[1:].strip()
+                    else:
+                        # 普通单行值
+                        val = val_stripped.strip('"').strip("'")
+                    
+                    # 类型转换
+                    if isinstance(val, str) and val.lower() == 'true':
                         val = True
-                    elif val.lower() == 'false':
+                    elif isinstance(val, str) and val.lower() == 'false':
                         val = False
-                    elif val.isdigit():
+                    elif isinstance(val, str) and val.isdigit():
                         val = int(val)
-                    fm[key.strip()] = val
+                    fm[key] = val
+                i += 1
             return fm, body
     # 无 frontmatter 的旧格式兼容
     return {}, content.strip()
