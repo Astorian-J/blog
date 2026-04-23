@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>《昆特牌》平衡委员会如何运作？Lerio & Shinmiri 投票联盟 - 中国社区昆特平衡数据库</title>
+    <style>
+        /* ===== 重置与基础 ===== */
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg: #fafafa;
+            --card-bg: #ffffff;
+            --text-primary: #1a1a1a;
+            --text-secondary: #666666;
+            --text-muted: #999999;
+            --accent: #2563eb;
+            --accent-hover: #1d4ed8;
+            --border: #e5e5e5;
+            --tag-bg: #f0f0f0;
+            --nav-bg: rgba(255,255,255,0.92);
+        }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            background: var(--bg); color: var(--text-primary); line-height: 1.7; min-height: 100vh;
+        }
+        a { color: inherit; text-decoration: none; }
+        a:hover { color: var(--accent); }
+
+        /* ===== 导航栏 ===== */
+        .navbar {
+            position: fixed; top: 0; left: 0; right: 0; height: 60px;
+            background: var(--nav-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border); display: flex; align-items: center;
+            justify-content: space-between; padding: 0 40px; z-index: 1000;
+        }
+        .logo { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
+        .logo span { color: var(--accent); }
+        .logo a:hover { color: inherit; }
+
+        /* ===== 主内容区 ===== */
+        .main-content { max-width: 780px; margin: 0 auto; padding: 90px 24px 60px; }
+
+        /* ===== 返回按钮 ===== */
+        .back-link {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-size: 14px; color: var(--accent); font-weight: 500;
+            margin-bottom: 28px; transition: opacity 0.2s;
+        }
+        .back-link:hover { opacity: 0.75; }
+
+        /* ===== 文章头部 ===== */
+        .article-header { margin-bottom: 32px; }
+        .article-tag {
+            display: inline-block; padding: 3px 12px; border-radius: 20px;
+            background: var(--tag-bg); font-size: 12.5px; color: var(--text-secondary);
+            font-weight: 500; margin-bottom: 14px;
+        }
+        .article-tag.highlight { background: rgba(37,99,235,0.08); color: var(--accent); }
+        .article-title {
+            font-size: 26px; font-weight: 700; line-height: 1.35;
+            color: var(--text-primary); margin-bottom: 14px;
+        }
+        .article-meta {
+            display: flex; align-items: center; gap: 16px;
+            font-size: 13.5px; color: var(--text-muted); flex-wrap: wrap;
+        }
+        .article-meta a { color: var(--accent); font-weight: 500; text-decoration: none; }
+        .article-meta a:hover { text-decoration: underline; }
+
+        /* ===== 文章正文 ===== */
+        .article-body {
+            font-size: 15px; line-height: 1.9; color: var(--text-secondary);
+            padding-bottom: 48px;
+        }
+        .article-body h1 { font-size: 22px; font-weight: 700; margin-top: 32px; margin-bottom: 10px; color: var(--text-primary); }
+        .article-body h2 { font-size: 19px; font-weight: 600; margin-top: 28px; margin-bottom: 8px; color: var(--text-primary); }
+        .article-body h3 { font-size: 16px; font-weight: 600; margin-top: 24px; margin-bottom: 6px; color: var(--text-primary); }
+        .article-body p { margin-bottom: 14px; }
+        .article-body ul, .article-body ol { margin-bottom: 14px; padding-left: 24px; }
+        .article-body li { margin-bottom: 5px; }
+        .article-body strong { color: var(--text-primary); }
+        .article-body code {
+            background: #f1f3f5; padding: 2px 7px; border-radius: 4px; font-size: 13.5px;
+        }
+        .article-body blockquote {
+            border-left: 3px solid var(--accent);
+            padding: 10px 18px; margin: 14px 0;
+            background: rgba(59,130,246,0.04); color: var(--text-muted);
+        }
+        .article-body img { max-width: 100%; border-radius: 8px; margin: 14px 0; }
+        .article-body a { color: #d4a017; text-decoration: underline; text-decoration-color: #d4a017; text-underline-offset: 2px; }
+        .article-body a:hover { color: #b8860b; text-decoration-thickness: 1.5px; }
+        .article-body hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+        /* ===== 页脚 ===== */
+        footer {
+            text-align: center; padding: 28px 24px; font-size: 12.5px;
+            color: var(--text-muted); border-top: 1px solid var(--border);
+        }
+        footer a { color: var(--text-secondary); }
+
+        /* ===== 响应式 ===== */
+        @media (max-width: 640px) {
+            .navbar { padding: 0 20px; }
+            .main-content { padding: 80px 16px 40px; }
+            .article-title { font-size: 21px; }
+            .article-body { font-size: 14.5px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- 导航栏 -->
+<nav class="navbar">
+    <div class="logo"><a href="../">昆特<span>平衡数据库</span></a></div>
+</nav>
+
+<!-- 主内容 -->
+<main class="main-content">
+
+    <!-- 返回按钮 -->
+    <a href="../#articles" class="back-link">← ← 返回文章列表</a>
+
+    <!-- 文章内容 -->
+    <article class="article-header">
+        <span class="article-tag">分析</span>
+        <h1 class="article-title">《昆特牌》平衡委员会如何运作？Lerio & Shinmiri 投票联盟</h1>
+        <div class="article-meta">
+            <span>2026-04-23</span>
+            <a href="https://leriohub.com/how-gwent-balance-council-works-lerio-shinmiri-voting-coalition/" target="_blank" rel="noopener noreferrer">🔗 查看原文</a>
+        </div>
+    </article>
+
+    <div class="article-body">
+        <p><strong><font style="font-size:23px">《昆特牌平衡规则》委员会 (BC)</font></strong><br>《巫师之昆特牌：平衡委员会》的规则详见官方常见问题解答。《巫师之昆特牌：平衡委员会》的实践表明，以下几点同样重要且值得了解（更新于2025年4月）：<br>A：独立选民自发聚集在一起为社区寻求最佳解决方案的理想主义愿景既不现实也不真实：<br>     1.此类投票缺乏协调。例如，如果一套卡组值得削弱，但有五种常见的削弱方式，那么通常所有五种削弱方式都会通过，最终导致过度削弱。<br>     2.富有创意且不明显的改动，如果没有广泛的沟通就无法通过。即使做出非常明智的改动，除非你在《昆特牌》社区中积极发声，争取尽可能多的支持，否则不会产生任何效果。除非对某张卡牌有强烈的情感，否则人们永远不会像独立投票者那样自发地得出结论。<br>     3.对于独立选民来说，最常经历的是针对上个赛季对流行卡组的削弱（=增强）和对最受欢迎卡牌的削弱，尤其是当这些削弱传达负面情绪时。 <br>     4.俄罗斯/独联体和中国社区在《昆特牌》中最具代表性（参见《昆特牌无限》国家篇，译注：指俄罗斯和中国玩家占全球比例最高，其中俄罗斯玩家常年占比25-30%，中国玩家占比20-25%），并且始终对平衡理事会的结果具有最大的影响力。事实证明，在不同社区组成的平衡联盟中，只有拥有规模庞大的社区以及具有强大影响力的玩家，在他们促成强大联盟时，他们的投票才是最有效果的。即使是像中国这样玩家占比最高的国家，如果分裂，也会被证明（投票）效率低下。我们所说的平衡联盟是指根据一个模板调整投票，通常是在投票和讨论阶段之后。例如（2025年4月）：<br>B：俄罗斯/独联体联盟 – MetallicDanny （MD），ACP（独联体活跃玩家, 2025年5月已停止更新平衡内容）<br>     1.中国人最初是独立投票，但很快意识到不匹配的选票影响甚微，就组建了联盟。中国联盟的首次出现就产生了巨大的影响。然而，华人联盟并不稳定——它们的建立和解散是由于内部分歧以及更民主、更权威的模式之间的竞争。最近的一个：<a href="https://www.bilibili.com/video/BV1atZVY5ELv/?buvid=Y7474E754AA825F44FEA8B0195712A6FEBF0&from_spmid=search.search-result.0.0&is_story_h5=false&mid=u5gydyJo16vaNSIDpMiIzQ%3D%3D&plat_id=114&share_from=ugc&share_medium=iphone&share_plat=ios&share_session_id=50D6C3F2-6686-4051-9384-89C8330BE28A&share_source=COPY&share_tag=s_i&timestamp=1743141982&unique_k=hW0oZY1&up_id=100832941" target="_blank">昆特平衡数据库</a><br> <br>     2.世界其他国家只有通过强有力的联盟才能获得选，这些人占总玩家30%左右。对于他们来说，每次投票有3个上榜就算达成目标了。话虽如此，当然，各社区不必全国性地采取行动——许多选民只是从各个联盟中挑选自己喜欢的人。比如Kerpeten  和Dauren （也是独联体成员），  Shinmiri和 Lerio。<br>     3.平衡联盟有效地减少了民主因素——与更接近的选票分配相比，个人选民的意义更小——但可以实现更好的协调，并且对游戏有利（除非有影响力的人被误导）。<br>     4.高度协调需要有影响力的群体之间的沟通；否则，如果两个群体采用相同的方法，则很可能会过度削弱或过度增强。 <br><strong><font style="font-size:23px">哪些卡牌需要增强？</font></strong><br>A：平衡委员会中，增益效果有三组不同的卡牌和方法：<br>     1.增强最弱的未使用卡牌。这种方法通常有利于长期平衡，但不会带来任何环境变化；最弱的卡牌需要一些协调的增强才能变得有意义。遵循这种方法时，重要的是选择具有有趣效果的卡牌，这些卡牌确实可能为昆特牌的玩法和数学带来新意。仅仅因为“看起来太差”或“值得公平对待”就选择一张卡牌，并不是一个有效的方法。<br>     2.增强完全没玩过的卡牌，使其立即变得相当可观。这是中庸之道，对长期和短期都有好处。这类卡牌的数量通常有限。此外，在选出一张卡牌之前，你需要有良好的识别能力，以确保：1）这张卡牌确实是因为强度不足而被弃用，而不仅仅是因为热度问题；2）这张卡牌不会变得过强/不健康，这一点很重要，因为贪婪引擎的强度增强在这一群体中最为常见。在《昆特牌平衡》记录中，这种方法的例子有：突变体 +1 战力、多尔·布拉萨纳的低语者 +1 战力、狮鹫学徒 +1……<br>     3.增强那些表现不佳/不受欢迎的派系/套牌中的卡牌 ——这种方法能带来最直接的影响，但如果使用不当，往往会导致力量膨胀，或被立即拔河回退版本，从长远来看这是不好的。首先，我们需要确保给定的牌组确实处于t3或更低的水平。有时，一些套牌仅仅因为没有被尝试过而被普遍认为是“不好的”，而实际上它们却是顶级的——一个例子就是，2024年帝国毒奶被 Kerpeten 开发出来了。然后，我们需要选择一张卡牌，这张牌目前还没有被广泛运用到当前强势卡组之中，并且在增强之后也不会这张牌也不会被滥用。此类改动的一个出色例子是为校友会提供 +1 力量增强。<br>     4.另一种做法是 追逐影响力。我们想要立即撼动游戏格局，因此不去考虑平衡性，而是简单地选择那些最能提升目标套牌类型的改动。一个套牌来自t2级高位，因此它们应该在增强后升至t1级，并获得一定的人气。 这种方法对游戏非常不利。它不仅会导致卡牌实力膨胀，让最佳套牌离t3/t2级越来越远，从而降低多样性。而且，几乎所有以这种方式增强的卡牌在下一个版本中都会自然而然地被移除。我们最终陷入了循环。</p><p><br><img src="content/images/ca63a560_image1.png" alt="image1.png"><br>（图：<br>我讨厌愚蠢的奴隶贩子，这坨狗屎必须滚去6p！！！！！<br>老哥我懂你，所以我们来加强史坦尼斯王子吧。）</p><p><strong><font style="font-size:23px">哪些卡牌需要削弱？</font></strong><br>人们想要削弱的数量总是少于增强候选者的数量。因此，在独立社区中（但对于回归者来说），削弱通常比增强更有针对性。 <br>A：以下是常见的削弱方法：<br>     1.削弱最强套牌中资源最高效的卡牌 ——这是自然而必要的做法；最强套牌应该被削弱，以保持环境中卡组的新鲜感。如果投票者从网络套牌中选择了太多卡牌，就可能导致过度削弱。为了避免这种情况，最好的办法是在最终投票前查看有影响力人士的建议。删除那些如果与他们的推荐同时进行，会导致过度削弱的投票。<br>     2.削弱最受欢迎的卡组（无论强度如何）的卡牌——目的是让天梯更加多样化。我反对这种做法——这基本上是无缘无故地削弱了社区最受欢迎的卡组。下个版本极有可能恢复这种做法。受欢迎程度不应成为衡量标准，平衡才是关键。<br>     3.削弱具有不健康/二元特征的卡牌。（译注：二元指无交互或全解）这是一种可行的方法，即使平均而言比较平衡，某些卡牌也值得削弱，以降低其使用率。棘手的部分在于定义哪些卡牌确实不健康，哪些只是被讨厌而已。将卫士调整为10费战役是一个合理的例子，而将猎龙人调整为1——绝对不是。</p><p><br><img src="content/images/cb61e423_image2.png" alt="image2.png"><br>（图：<br>我投纳乌西卡旅继续拔河------不！！！这玩意R1没法打，6p只有10点<br>诺威格瑞有点太强了 -------确实，我觉得老是用一套牌赢的不光彩。）</p><p><strong><font style="font-size:23px">Lerio & Shinmiri 平衡联盟</font></strong><br>2024年6月是我们首次与传奇昆特牌主播Shinmiri联手，并联合投票。自2024年7月起，我们于当月发布了一项投票（在Reddit上，以7月份为例），以了解社区对各种削弱/增强方案的看法。我们不严格遵循得票数高低的顺序，但我们会避免选择那些不太可能通过的冷门方案。"<br>---</p><p><strong><font style="font-size:23px">Lerio & Shinmiri 平衡联盟</font></strong><br>2024年6月是我们首次与传奇昆特牌主播Shinmiri联手，并联合投票。自2024年7月起，我们于当月发布了一项投票（在Reddit上，以7月份为例），以了解社区对各种削弱/增强方案的看法。我们不严格遵循得票数高低的顺序，但我们会避免选择那些不太可能通过的冷门方案。"<br>---</p><p><strong><font style="font-size:23px">《昆特牌平衡规则》委员会 (BC)</font></strong><br>《巫师之昆特牌：平衡委员会》的规则详见官方常见问题解答。《巫师之昆特牌：平衡委员会》的实践表明，以下几点同样重要且值得了解（更新于2025年4月）：<br>A：独立选民自发聚集在一起为社区寻求最佳解决方案的理想主义愿景既不现实也不真实：<br>     1.此类投票缺乏协调。例如，如果一套卡组值得削弱，但有五种常见的削弱方式，那么通常所有五种削弱方式都会通过，最终导致过度削弱。<br>     2.富有创意且不明显的改动，如果没有广泛的沟通就无法通过。即使做出非常明智的改动，除非你在《昆特牌》社区中积极发声，争取尽可能多的支持，否则不会产生任何效果。除非对某张卡牌有强烈的情感，否则人们永远不会像独立投票者那样自发地得出结论。<br>     3.对于独立选民来说，最常经历的是针对上个赛季对流行卡组的削弱（=增强）和对最受欢迎卡牌的削弱，尤其是当这些削弱传达负面情绪时。 <br>     4.俄罗斯/独联体和中国社区在《昆特牌》中最具代表性（参见《昆特牌无限》国家篇，译注：指俄罗斯和中国玩家占全球比例最高，其中俄罗斯玩家常年占比25-30%，中国玩家占比20-25%），并且始终对平衡理事会的结果具有最大的影响力。事实证明，在不同社区组成的平衡联盟中，只有拥有规模庞大的社区以及具有强大影响力的玩家，在他们促成强大联盟时，他们的投票才是最有效果的。即使是像中国这样玩家占比最高的国家，如果分裂，也会被证明（投票）效率低下。我们所说的平衡联盟是指根据一个模板调整投票，通常是在投票和讨论阶段之后。例如（2025年4月）：<br>B：俄罗斯/独联体联盟 – MetallicDanny （MD），ACP（独联体活跃玩家, 2025年5月已停止更新平衡内容）<br>     1.中国人最初是独立投票，但很快意识到不匹配的选票影响甚微，就组建了联盟。中国联盟的首次出现就产生了巨大的影响。然而，华人联盟并不稳定——它们的建立和解散是由于内部分歧以及更民主、更权威的模式之间的竞争。最近的一个：<a href="https://www.bilibili.com/video/BV1atZVY5ELv/?buvid=Y7474E754AA825F44FEA8B0195712A6FEBF0&from_spmid=search.search-result.0.0&is_story_h5=false&mid=u5gydyJo16vaNSIDpMiIzQ%3D%3D&plat_id=114&share_from=ugc&share_medium=iphone&share_plat=ios&share_session_id=50D6C3F2-6686-4051-9384-89C8330BE28A&share_source=COPY&share_tag=s_i&timestamp=1743141982&unique_k=hW0oZY1&up_id=100832941" target="_blank">昆特平衡数据库</a><br> <br>     2.世界其他国家只有通过强有力的联盟才能获得选，这些人占总玩家30%左右。对于他们来说，每次投票有3个上榜就算达成目标了。话虽如此，当然，各社区不必全国性地采取行动——许多选民只是从各个联盟中挑选自己喜欢的人。比如Kerpeten  和Dauren （也是独联体成员），  Shinmiri和 Lerio。<br>     3.平衡联盟有效地减少了民主因素——与更接近的选票分配相比，个人选民的意义更小——但可以实现更好的协调，并且对游戏有利（除非有影响力的人被误导）。<br>     4.高度协调需要有影响力的群体之间的沟通；否则，如果两个群体采用相同的方法，则很可能会过度削弱或过度增强。 <br><strong><font style="font-size:23px">哪些卡牌需要增强？</font></strong><br>A：平衡委员会中，增益效果有三组不同的卡牌和方法：<br>     1.增强最弱的未使用卡牌。这种方法通常有利于长期平衡，但不会带来任何环境变化；最弱的卡牌需要一些协调的增强才能变得有意义。遵循这种方法时，重要的是选择具有有趣效果的卡牌，这些卡牌确实可能为昆特牌的玩法和数学带来新意。仅仅因为“看起来太差”或“值得公平对待”就选择一张卡牌，并不是一个有效的方法。<br>     2.增强完全没玩过的卡牌，使其立即变得相当可观。这是中庸之道，对长期和短期都有好处。这类卡牌的数量通常有限。此外，在选出一张卡牌之前，你需要有良好的识别能力，以确保：1）这张卡牌确实是因为强度不足而被弃用，而不仅仅是因为热度问题；2）这张卡牌不会变得过强/不健康，这一点很重要，因为贪婪引擎的强度增强在这一群体中最为常见。在《昆特牌平衡》记录中，这种方法的例子有：突变体 +1 战力、多尔·布拉萨纳的低语者 +1 战力、狮鹫学徒 +1……<br>     3.增强那些表现不佳/不受欢迎的派系/套牌中的卡牌 ——这种方法能带来最直接的影响，但如果使用不当，往往会导致力量膨胀，或被立即拔河回退版本，从长远来看这是不好的。首先，我们需要确保给定的牌组确实处于t3或更低的水平。有时，一些套牌仅仅因为没有被尝试过而被普遍认为是“不好的”，而实际上它们却是顶级的——一个例子就是，2024年帝国毒奶被 Kerpeten 开发出来了。然后，我们需要选择一张卡牌，这张牌目前还没有被广泛运用到当前强势卡组之中，并且在增强之后也不会这张牌也不会被滥用。此类改动的一个出色例子是为校友会提供 +1 力量增强。<br>     4.另一种做法是 追逐影响力。我们想要立即撼动游戏格局，因此不去考虑平衡性，而是简单地选择那些最能提升目标套牌类型的改动。一个套牌来自t2级高位，因此它们应该在增强后升至t1级，并获得一定的人气。 这种方法对游戏非常不利。它不仅会导致卡牌实力膨胀，让最佳套牌离t3/t2级越来越远，从而降低多样性。而且，几乎所有以这种方式增强的卡牌在下一个版本中都会自然而然地被移除。我们最终陷入了循环。</p><p><br><img src="content/images/ca63a560_image1.png" alt="image1.png"><br>（图：<br>我讨厌愚蠢的奴隶贩子，这坨狗屎必须滚去6p！！！！！<br>老哥我懂你，所以我们来加强史坦尼斯王子吧。）</p><p><strong><font style="font-size:23px">哪些卡牌需要削弱？</font></strong><br>人们想要削弱的数量总是少于增强候选者的数量。因此，在独立社区中（但对于回归者来说），削弱通常比增强更有针对性。 <br>A：以下是常见的削弱方法：<br>     1.削弱最强套牌中资源最高效的卡牌 ——这是自然而必要的做法；最强套牌应该被削弱，以保持环境中卡组的新鲜感。如果投票者从网络套牌中选择了太多卡牌，就可能导致过度削弱。为了避免这种情况，最好的办法是在最终投票前查看有影响力人士的建议。删除那些如果与他们的推荐同时进行，会导致过度削弱的投票。<br>     2.削弱最受欢迎的卡组（无论强度如何）的卡牌——目的是让天梯更加多样化。我反对这种做法——这基本上是无缘无故地削弱了社区最受欢迎的卡组。下个版本极有可能恢复这种做法。受欢迎程度不应成为衡量标准，平衡才是关键。<br>     3.削弱具有不健康/二元特征的卡牌。（译注：二元指无交互或全解）这是一种可行的方法，即使平均而言比较平衡，某些卡牌也值得削弱，以降低其使用率。棘手的部分在于定义哪些卡牌确实不健康，哪些只是被讨厌而已。将卫士调整为10费战役是一个合理的例子，而将猎龙人调整为1——绝对不是。</p><p><br><img src="content/images/cb61e423_image2.png" alt="image2.png"><br>（图：<br>我投纳乌西卡旅继续拔河------不！！！这玩意R1没法打，6p只有10点<br>诺威格瑞有点太强了 -------确实，我觉得老是用一套牌赢的不光彩。）</p><p><strong><font style="font-size:23px">Lerio & Shinmiri 平衡联盟</font></strong><br>2024年6月是我们首次与传奇昆特牌主播Shinmiri联手，并联合投票。自2024年7月起，我们于当月发布了一项投票（在Reddit上，以7月份为例），以了解社区对各种削弱/增强方案的看法。我们不严格遵循得票数高低的顺序，但我们会避免选择那些不太可能通过的冷门方案。</p>
+    </div>
+
+</main>
+
+<!-- 页脚 -->
+<footer>
+    <p>&copy; 2026 中国社区昆特平衡数据库</p>
+</footer>
+
+</body>
+</html>
