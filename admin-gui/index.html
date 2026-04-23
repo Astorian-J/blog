@@ -649,6 +649,8 @@ async function renderEditForm(colName, values) {
               <input type="file" accept=".png,.jpg,.jpeg,.gif,.webp,.svg" onchange="uploadImageForField(this, 'f_${field.name}')" style="display:none;">
             </label>
             <button type="button" class="btn btn-sm" style="background:var(--bg-tertiary);border-color:#d4a017;color:#e8c547;padding:5px 14px;font-size:12px;border-radius:6px;display:inline-flex;align-items:center;gap:4px;" onclick="insertLink('f_${field.name}')">🔗 插入超链接</button>
+            <button type="button" class="btn btn-sm" style="background:var(--bg-tertiary);border-color:#8b5cf6;color:#a78bfa;padding:5px 14px;font-size:12px;border-radius:6px;display:inline-flex;align-items:center;gap:4px;" onclick="insertBold('f_${field.name}')">B <strong>加粗</strong></button>
+            <button type="button" class="btn btn-sm" style="background:var(--bg-tertiary);border-color:#0891b2;color:#22d3ee;padding:5px 14px;font-size:12px;border-radius:6px;display:inline-flex;align-items:center;gap:4px;" onclick="insertFontSize('f_${field.name}')">A 字号</button>
             <span id="img-status-${field.name}" style="font-size:12px;color:var(--text-secondary);"></span>
           </div>` : '';
         const hint = field.hint ? `<div class="editor-hint">${field.hint}</div>` : '';
@@ -892,6 +894,53 @@ function insertLink(textareaId) {
   // 替换选中文本或插入到光标位置
   ta.setRangeText(mdLink, start, end, 'end');
   // 光标移到末尾方便继续编辑
+  ta.dispatchEvent(new Event('input', { bubbles: true }));
+}
+
+// ==================== 插入粗体（Markdown 编辑器） ====================
+function insertBold(textareaId) {
+  const ta = document.getElementById(textareaId);
+  if (!ta) return;
+
+  const start = ta.selectionStart;
+  const end = ta.selectionEnd;
+  const selectedText = ta.value.substring(start, end) || '粗体文字';
+
+  // Markdown 粗体语法：**文字**
+  const mdBold = `**${selectedText}**`;
+  ta.focus();
+  ta.setRangeText(mdBold, start, end, 'end');
+  // 选中内部的文字方便用户覆盖
+  ta.selectionStart = start + 2;
+  ta.selectionEnd = end + 4;
+  ta.dispatchEvent(new Event('input', { bubbles: true }));
+}
+
+// ==================== 插入字号（Markdown 编辑器） ====================
+function insertFontSize(textareaId) {
+  const ta = document.getElementById(textareaId);
+  if (!ta) return;
+
+  const start = ta.selectionStart;
+  const end = ta.selectionEnd;
+  const selectedText = ta.value.substring(start, end) || '需要改变大小的文字';
+
+  // 弹出选择框：HTML font size 标签（前台渲染支持）
+  const sizes = ['小(12px)', '默认(16px)', '中(18px)', '大(22px)', '超大(28px)'];
+  const sizeMap = { '小(12px)': 12, '默认(16px)': 16, '中(18px)': 18, '大(22px)': 22, '超大(28px)': 28 };
+  const choice = prompt(
+    '请输入字号大小（数字，如 18、22、28）或直接选：\n12=小 | 16=默认 | 18=中 | 22=大 | 28=超大',
+    '22'
+  );
+  if (choice === null || choice.trim() === '') return;
+
+  let pxSize = parseInt(choice) || 22;
+  if (isNaN(pxSize)) pxSize = 22;
+
+  // 使用 HTML font 标签包裹：<font size="22">文字</font>
+  const mdFont = `<font style="font-size:${pxSize}px">${selectedText}</font>`;
+  ta.focus();
+  ta.setRangeText(mdFont, start, end, 'end');
   ta.dispatchEvent(new Event('input', { bubbles: true }));
 }
 

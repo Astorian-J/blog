@@ -194,7 +194,7 @@ function renderMd(md) {
     if (!md) return '';
     // 使用 marked 库渲染（已引入 CDN）
     if (typeof marked !== 'undefined' && marked.parse) {
-        return marked.parse(md);
+        return marked.parse(md, { gfm: true, breaks: false, html: true });
     }
     // fallback 手动渲染
     let html = md
