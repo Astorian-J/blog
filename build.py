@@ -66,9 +66,25 @@ def parse_frontmatter(content):
 # ============================================================
 
 def slugify(text):
-    """生成 URL 友好的 slug"""
-    text = text.strip().lower()
-    text = re.sub(r'[^\w\u4e00-\u9fff\-]', '-', text)
+    """生成纯英文 URL 友好的 slug（中文自动转拼音）"""
+    text = text.strip()
+    # 尝试中文转拼音
+    try:
+        from pypinyin import lazy_pinyin
+        parts = []
+        for ch in text:
+            if '\u4e00' <= ch <= '\u9fff':
+                py = lazy_pinyin(ch)
+                parts.append(py[0] if py else '')
+            elif ch.isalnum():
+                parts.append(ch.lower())
+            elif ch in '-_ ':
+                parts.append('-')
+        text = ''.join(parts)
+    except ImportError:
+        # 未安装 pypinyin 时去掉非 ASCII 字符
+        text = re.sub(r'[^\w\-]', '-', text)
+
     text = re.sub(r'-{2,}', '-', text).strip('-')
     return text or 'untitled'
 
@@ -191,14 +207,33 @@ def build():
         body_html = render_md(data['body'])
 
         # 从原始文件名提取日期前缀，或从 frontmatter 的 date 字段生成 slug
-        # 文件名格式：2026-04-20-标题.md
+        # 文件名格式：2026-04-20-标题拼音-分类英文.html
         base_name = md_file[:-3]  # 去掉 .md
         title = fm.get('title', '')
-        if title:
-            slug = slugify(title)
-            html_filename = slug + '.html'
+        date_val = fm.get('date', '')
+        tag = fm.get('tag', '')
+
+        # 提取日期（优先用 frontmatter 的 date，否则从 md 文件名提取）
+        if date_val:
+            dt_part = date_val[:10].replace('-', '')
         else:
-            html_filename = base_name + '.html'
+            # 从文件名前10字符提取 YYYY-MM-DD
+            dt_part = base_name[:10].replace('-', '') if len(base_name) >= 10 else ''
+
+        # 标题转拼音 slug
+        title_slug = slugify(title) if title else 'untitled'
+
+        # 分类标签 → 英文映射
+        tag_map = {
+            '故事': 'story', '教程': 'tutorial',
+            '分析': 'analysis', '杂谈': 'essay',
+            '平衡人物志': 'profile', '': '',
+        }
+        tag_en = tag_map.get(tag, slugify(tag)) if tag else ''
+
+        # 拼接：日期 + 标题拼音 + 分类英文
+        parts = [p for p in [dt_part, title_slug, tag_en] if p]
+        html_filename = '-'.join(parts) + '.html'
 
         # 渲染页面
         page_html = render_article_html(fm, body_html)

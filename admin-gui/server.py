@@ -111,11 +111,27 @@ COLLECTIONS = {
 
 
 def slugify(text):
-    """生成 URL 友好的 slug"""
-    text = text.strip().lower()
-    text = re.sub(r'[^\w\u4e00-\u9fff\-]', '-', text)
+    """生成纯英文 URL 友好的 slug（中文自动转拼音）"""
+    text = text.strip()
+    # 尝试中文转拼音
+    try:
+        from pypinyin import lazy_pinyin
+        parts = []
+        for ch in text:
+            if '\u4e00' <= ch <= '\u9fff':
+                py = lazy_pinyin(ch)
+                parts.append(py[0] if py else '')
+            elif ch.isalnum():
+                parts.append(ch.lower())
+            elif ch in '-_ ':
+                parts.append('-')
+        text = ''.join(parts)
+    except ImportError:
+        # 未安装 pypinyin 时去掉非 ASCII 字符
+        text = re.sub(r'[^\w\-]', '-', text)
+
     text = re.sub(r'-{2,}', '-', text).strip('-')
-    return text
+    return text or 'untitled'
 
 
 def generate_slug(collection_name, data, date_str):
