@@ -287,10 +287,15 @@ def save_file(collection_name, filename, data, body=""):
     fm_data = {}
     for field in COLLECTIONS[collection_name]["fields"]:
         fname = field["name"]
+        # body 字段只写入正文，不写入 frontmatter 避免重复渲染
+        if fname == "body":
+            continue
         if fname in data and data[fname] is not None:
             fm_data[fname] = data[fname]
     
-    content = make_frontmatter(fm_data) + '\n\n' + (body or '')
+    # 确保使用传入的 body 参数（前端传来的最新正文内容）
+    final_body = body or data.get('body', '') or ''
+    content = make_frontmatter(fm_data) + '\n\n' + final_body
     with open(filepath, 'w', encoding='utf-8') as f:
         f.write(content)
     return os.path.relpath(filepath, BLOG_DIR)
@@ -650,8 +655,8 @@ class AdminHandler(SimpleHTTPRequestHandler):
                 self.send_json({'error': '未找到上传的文件'}, status=400)
                 return
 
-            # 安全化文件名：只保留字母数字和点
-            safe_name = re.sub(r'[^\w\.\-]', '', os.path.splitext(filename)[0])
+            # 安全化文件名：只保留 ASCII 字母数字、连字符和点（禁止中文）
+            safe_name = re.sub(r'[^\w\.\-]', '', os.path.splitext(filename)[0], flags=re.ASCII)
             ext = os.path.splitext(filename)[1].lower() or '.png'
             allowed_exts = {'.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg'}
             if ext not in allowed_exts:
