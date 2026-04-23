@@ -642,7 +642,8 @@ async function renderEditForm(colName, values) {
           <select class="form-control" id="f_${field.name}">${opts}</select></div>`;
       } else if (field.type === 'textarea' || field.type === 'markdown') {
         const isMarkdown = field.type === 'markdown';
-        const uploadBtn = isMarkdown ? `
+        // Markdown 编辑区：完整工具栏（图片+链接+加粗+字号）
+        const mdToolbar = isMarkdown ? `
           <div style="display:flex;align-items:center;gap:10px;margin-top:6px;flex-wrap:wrap;">
             <label class="btn btn-sm" style="cursor:pointer;background:var(--bg-tertiary);border-color:var(--accent);color:var(--accent);padding:5px 14px;font-size:12px;border-radius:6px;display:inline-flex;align-items:center;gap:4px;">
               🖼 插入图片
@@ -653,6 +654,12 @@ async function renderEditForm(colName, values) {
             <button type="button" class="btn btn-sm" style="background:var(--bg-tertiary);border-color:#0891b2;color:#22d3ee;padding:5px 14px;font-size:12px;border-radius:6px;display:inline-flex;align-items:center;gap:4px;" onclick="insertFontSize('f_${field.name}')">A 字号</button>
             <span id="img-status-${field.name}" style="font-size:12px;color:var(--text-secondary);"></span>
           </div>` : '';
+        // 普通 textarea（如内容摘要）：只给超链接按钮
+        const txtToolbar = !isMarkdown ? `
+          <div style="display:flex;align-items:center;gap:10px;margin-top:6px;">
+            <button type="button" class="btn btn-sm" style="background:var(--bg-tertiary);border-color:#d4a017;color:#e8c547;padding:5px 14px;font-size:12px;border-radius:6px;display:inline-flex;align-items:center;gap:4px;" onclick="insertLink('f_${field.name}')">🔗 插入超链接</button>
+          </div>` : '';
+        const uploadBtn = mdToolbar || txtToolbar;
         const hint = field.hint ? `<div class="editor-hint">${field.hint}</div>` : '';
         const taRows = isMarkdown ? 12 : (field.name === 'excerpt' ? 4 : 3);
         formHtml += `<div class="form-group"><label>${field.label}${required}</label>
