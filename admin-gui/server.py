@@ -93,6 +93,19 @@ COLLECTIONS = {
             {"name": "image", "label": "推荐截图", "type": "image"},
         ],
     },
+    "streamers": {
+        "label": "🎙 中国社区昆特主播",
+        "folder": "streamers",
+        "slug_format": "{year}-{month}-{day}-{slug}",
+        "fields": [
+            {"name": "title", "label": "标题", "type": "text", "required": True},
+            {"name": "date", "label": "日期", "type": "date", "required": True},
+            {"name": "tag", "label": "分类标签", "type": "select", "options": ["故事", "教程", "分析", "杂谈", "平衡人物志"]},
+            {"name": "excerpt", "label": "文章摘要", "type": "textarea"},
+            {"name": "source_url", "label": "原文链接", "type": "text", "hint": "原文出处链接，可选，前台会显示「查看原文」按钮"},
+            {"name": "body", "label": "正文内容（支持 Markdown 图片语法）", "type": "markdown", "required": True, "hint": "支持图片: ![描述](图片路径) | 可用下方按钮插入本地图片"},
+        ],
+    },
 }
 
 # ==================== 工具函数 ====================
