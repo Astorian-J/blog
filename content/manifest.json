@@ -34,6 +34,9 @@
   "streamers": [
     "content/streamers/2026-04-23-中国昆特牌主播大全.md"
   ],
+  "survey-link": [
+    "content/survey-link/link.md"
+  ],
   "articles_html": {
     "content/articles/2026-04-20-昆特牌-平衡委员会的作用是什么-成功-失败与民主的类比.md": "posts/20260420-kuntepaipinghengweiyuanhuidezuoyongshishenmechenggongshibaiyuminzhudeleibi-analysis.html",
     "content/articles/2026-04-21-对于社区问卷的一些看法.md": "posts/20260421-duiyushequwenjuandeyixiekanfa-essay.html"
