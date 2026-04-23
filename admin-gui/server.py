@@ -10,6 +10,7 @@ import sys
 import json
 import re
 import subprocess
+import shutil
 import urllib.parse
 import uuid
 from datetime import datetime
@@ -279,10 +280,15 @@ def get_files_in_collection(collection_name):
 
 
 def save_file(collection_name, filename, data, body=""):
-    """保存/更新一个 Markdown 文件"""
+    """保存/更新一个 Markdown 文件（保存前自动创建 .bak 备份）"""
     folder = os.path.join(CONTENT_DIR, COLLECTIONS[collection_name]["folder"])
     os.makedirs(folder, exist_ok=True)
     filepath = os.path.join(folder, filename)
+    
+    # 安全措施：保存前先备份现有文件（防止内容意外丢失）
+    if os.path.exists(filepath):
+        bak_path = filepath + '.bak'
+        shutil.copy2(filepath, bak_path)
     
     fm_data = {}
     for field in COLLECTIONS[collection_name]["fields"]:
@@ -381,6 +387,15 @@ def git_push(commit_msg="update content"):
             capture_output=True,
             check=True,
         )
+
+        # 2.5️⃣ 自动打 tag（用于回滚：git checkout <tag> 恢复到发布前状态）
+        tag_name = f"pre-publish-{datetime.now().strftime('%Y%m%d%H%M%S')}"
+        subprocess.run(
+            [GIT_EXE, "tag", "-f", tag_name],
+            cwd=str(BLOG_DIR),
+            capture_output=True,
+        )
+        print(f"[发布] 已打标签: {tag_name}")
 
         # 3️⃣ 拉取远程最新（rebase 模式，保持提交历史整洁）
         pull_result = subprocess.run(
@@ -605,7 +620,24 @@ class AdminHandler(SimpleHTTPRequestHandler):
                 self.send_json({'error': '删除失败或文件不存在'}, status=404)
             return
         
-        # API: 一键发布
+        # API: 从备份恢复（.bak → 原文件）
+        if path == '/api/restore-backup':
+            file_path = data.get('path')
+            if not file_path:
+                self.send_json({'error': '缺少路径'}, status=400)
+                return
+            
+            full_path = os.path.join(BLOG_DIR, file_path)
+            bak_path = full_path + '.bak'
+            
+            if os.path.exists(bak_path):
+                shutil.copy2(bak_path, full_path)
+                self.send_json({'success': True, 'message': f'已从备份恢复 {file_path}'})
+            else:
+                self.send_json({'error': '备份文件不存在'}, status=404)
+            return
+        
+        # API: 一键发布（发布前自动打 git tag）
         if path == '/api/publish':
             # 先更新 manifest
             update_manifest()
