@@ -24,14 +24,14 @@ jobs:
 
       - name: Ensure content directories exist
         run: |
-          mkdir -p content/news content/articles content/survey-data content/videos content/history content/bc-recommendations
+          mkdir -p content/news content/articles content/survey-data content/videos content/history content/bc-recommendations content/streamers
 
       - name: Generate manifest.json
         run: |
           cat > gen_manifest.py << 'PYEOF'
           import os, json, re
 
-          collections = ["news", "articles", "survey-data", "videos", "history", "bc-recommendations"]
+          collections = ["news", "articles", "survey-data", "videos", "history", "bc-recommendations", "streamers"]
           manifest = {}
 
           for col in collections:
