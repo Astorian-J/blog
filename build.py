@@ -195,10 +195,12 @@ def build():
         return True
 
     # 生成文件映射表（用于更新 manifest）
-    html_mapping = {}  # md文件名 → html相对路径
+    # key 用完整相对路径（与 manifest.articles 一致，确保前台 goToArticle() 直接命中）
+    html_mapping = {}  # content/articles/xxx.md → posts/yyy.html
 
     for md_file in sorted(md_files):
         md_path = os.path.join(CONTENT_DIR, md_file)
+        md_rel_path = os.path.relpath(md_path, BLOG_DIR).replace('\\', '/')  # 完整相对路径作为 key
         with open(md_path, 'r', encoding='utf-8') as f:
             content = f.read()
 
@@ -244,7 +246,7 @@ def build():
             f.write(page_html)
 
         html_path_relative = 'posts/' + html_filename
-        html_mapping[md_file] = html_path_relative
+        html_mapping[md_rel_path] = html_path_relative  # 用完整相对路径作为 key
         print(f"  [OK] {md_file} -> {html_path_relative}")
 
     # 更新 manifest.json，添加 articles_html 映射
