@@ -105,6 +105,14 @@ COLLECTIONS = {
             {"name": "body", "label": "正文内容（支持 Markdown 图片语法）", "type": "markdown", "required": True, "hint": "支持图片: ![描述](图片路径) | 可用下方按钮插入本地图片"},
         ],
     },
+    "survey-link": {
+        "label": "📋 问卷链接设置",
+        "folder": "survey-link",
+        "slug_format": "link",
+        "fields": [
+            {"name": "url", "label": "问卷网址", "type": "text", "required": True, "hint": "平衡民意问卷调查的外部链接地址"},
+        ],
+    },
 }
 
 # ==================== 工具函数 ====================
