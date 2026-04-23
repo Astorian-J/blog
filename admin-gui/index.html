@@ -643,11 +643,12 @@ async function renderEditForm(colName, values) {
       } else if (field.type === 'textarea' || field.type === 'markdown') {
         const isMarkdown = field.type === 'markdown';
         const uploadBtn = isMarkdown ? `
-          <div style="display:flex;align-items:center;gap:10px;margin-top:6px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-top:6px;flex-wrap:wrap;">
             <label class="btn btn-sm" style="cursor:pointer;background:var(--bg-tertiary);border-color:var(--accent);color:var(--accent);padding:5px 14px;font-size:12px;border-radius:6px;display:inline-flex;align-items:center;gap:4px;">
               🖼 插入图片
               <input type="file" accept=".png,.jpg,.jpeg,.gif,.webp,.svg" onchange="uploadImageForField(this, 'f_${field.name}')" style="display:none;">
             </label>
+            <button type="button" class="btn btn-sm" style="background:var(--bg-tertiary);border-color:#d4a017;color:#e8c547;padding:5px 14px;font-size:12px;border-radius:6px;display:inline-flex;align-items:center;gap:4px;" onclick="insertLink('f_${field.name}')">🔗 插入超链接</button>
             <span id="img-status-${field.name}" style="font-size:12px;color:var(--text-secondary);"></span>
           </div>` : '';
         const hint = field.hint ? `<div class="editor-hint">${field.hint}</div>` : '';
@@ -868,6 +869,30 @@ function escapeHtml(str) {
 function escapeJs(str) {
   if (!str || typeof str !== 'string') return '';
   return str.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"');
+}
+
+// ==================== 插入超链接（Markdown 编辑器） ====================
+function insertLink(textareaId) {
+  const ta = document.getElementById(textareaId);
+  if (!ta) return;
+
+  // 获取选中的文字
+  const start = ta.selectionStart;
+  const end = ta.selectionEnd;
+  const selectedText = ta.value.substring(start, end) || '链接文字';
+
+  // 弹出输入框
+  const url = prompt('请输入跳转网址（如 https://example.com）：', 'https://');
+  if (!url || url === 'https://' || url.trim() === '') return;
+
+  // 生成 Markdown 链接语法：[文字](URL)
+  const mdLink = `[${selectedText}](${url.trim()})`;
+  ta.focus();
+
+  // 替换选中文本或插入到光标位置
+  ta.setRangeText(mdLink, start, end, 'end');
+  // 光标移到末尾方便继续编辑
+  ta.dispatchEvent(new Event('input', { bubbles: true }));
 }
 
 // ==================== 图片上传（Markdown 编辑器 / Image 字段） ====================
