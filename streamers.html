@@ -16,7 +16,6 @@
             --text-secondary: #666666;
             --text-muted: #999999;
             --accent: #2563eb;
-            --accent-hover: #1d4ed8;
             --border: #e5e5e5;
             --tag-bg: #f0f0f0;
         }
@@ -31,6 +30,8 @@
 
         /* 主内容 */
         .main-content { max-width: 880px; margin: 0 auto; padding: 40px 24px 60px; }
+
+        /* ====== 列表视图 ====== */
 
         /* Hero */
         .hero {
@@ -72,11 +73,6 @@
         }
         .post-card:hover { border-color: #ccc; box-shadow: 0 4px 20px rgba(0,0,0,0.06); transform: translateY(-2px); }
         .post-meta { display: flex; align-items: center; gap: 10px; margin-bottom: 7px; font-size: 12.5px; }
-        .tag {
-            display: inline-block; padding: 2px 9px; background: var(--tag-bg);
-            border-radius: 4px; font-size: 11.5px; font-weight: 500; color: var(--text-secondary);
-        }
-        .tag.highlight { background: #fef2f2; color: #dc2626; }
         .post-date { color: var(--text-muted); }
         .post-title { font-size: 16.5px; font-weight: 600; margin-bottom: 5px; line-height: 1.45; transition: color 0.2s; }
         .post-card:hover .post-title { color: #ea580c; }
@@ -106,47 +102,88 @@
         /* 空状态 */
         .empty-state { text-align: center; padding: 48px 24px; color: var(--text-muted); font-size: 14px; }
 
-        /* 弹窗 */
-        .modal-overlay {
-            display: none; position: fixed; top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); z-index: 2000;
-            align-items: center; justify-content: center;
-            padding: 20px; box-sizing: border-box;
+        /* ====== 文章详情页（全屏独立视图）===== */
+        .article-view { display: none; }
+        .article-view.active { display: block; }
+        .list-view { display: block; }
+        .list-view.hidden { display: none; }
+
+        .article-hero {
+            text-align: center; padding: 50px 30px 36px; margin: 0 -24px 32px;
+            background: linear-gradient(135deg, #dc2626 0%, #ea580c 35%, #f97316 65%, #fb923c 100%);
+            border-radius: 12px; color: #fff; position: relative; overflow: hidden;
         }
-        .modal-overlay.active { display: flex; }
-        .modal-box {
-            background: var(--card-bg); border-radius: 12px;
-            max-width: 680px; width: 100%; max-height: 80vh;
-            overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.2);
-            padding: 32px 36px; position: relative;
+        .article-hero::before {
+            content: ''; position: absolute; inset: 0;
+            background: radial-gradient(circle at 20% 50%, rgba(255,255,255,0.06) 0%, transparent 50%);
+            pointer-events: none;
         }
-        .modal-close {
-            position: absolute; top: 16px; right: 18px;
-            background: none; border: none; font-size: 24px;
-            cursor: pointer; color: var(--text-muted); line-height: 1;
-            transition: color 0.2s; padding: 4px;
+        .article-hero h1 { font-size: 26px; font-weight: 700; letter-spacing: 1px; line-height: 1.35; position: relative; }
+        .article-hero .article-meta-line {
+            font-size: 13.5px; opacity: 0.75; margin-top: 10px; position: relative;
         }
-        .modal-close:hover { color: #e74c3c; }
-        .modal-title { font-size: 22px; font-weight: 700; margin-bottom: 8px; line-height: 1.4; }
-        .modal-meta { font-size: 13px; color: var(--text-muted); margin-bottom: 18px; }
-        .modal-body { font-size: 14.5px; line-height: 1.85; color: var(--text-secondary); }
-        .modal-body h1,.modal-body h2,.modal-body h3 { margin-top: 20px; margin-bottom: 8px; font-weight: 600; color: var(--text-primary); }
-        .modal-body h2 { font-size: 18px; }
-        .modal-body h3 { font-size: 15.5px; }
-        .modal-body p { margin-bottom: 12px; }
-        .modal-body ul,.modal-body ol { margin-bottom: 12px; padding-left: 22px; }
-        .modal-body li { margin-bottom: 4px; }
-        .modal-body code { background: #f1f3f5; padding: 1px 6px; border-radius: 4px; font-size: 13px; }
-        .modal-body blockquote {
+
+        .article-nav {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 28px; padding-bottom: 16px; border-bottom: 1px solid var(--border);
+        }
+        .article-back {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-size: 14px; color: var(--accent); font-weight: 600;
+            cursor: pointer; transition: opacity 0.2s;
+        }
+        .article-back:hover { opacity: 0.7; }
+        .article-source-link {
+            font-size: 13.5px; color: #ea580c; font-weight: 500;
+            text-decoration: none; padding: 5px 14px;
+            border-radius: 6px; border: 1px solid rgba(234,88,12,0.15);
+            background: rgba(234,88,12,0.06); transition: all 0.2s;
+        }
+        .article-source-link:hover { background: rgba(234,88,12,0.12); border-color: #ea580c; }
+
+        /* 文章正文 */
+        .article-body {
+            font-size: 15px; line-height: 1.9; color: var(--text-secondary);
+        }
+        .article-body h1, .article-body h2, .article-body h3 {
+            margin-top: 28px; margin-bottom: 10px; font-weight: 700; color: var(--text-primary);
+        }
+        .article-body h1 { font-size: 22px; }
+        .article-body h2 { font-size: 19px; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+        .article-body h3 { font-size: 16.5px; }
+        .article-body p { margin-bottom: 14px; }
+        .article-body ul, .article-body ol { margin-bottom: 14px; padding-left: 24px; }
+        .article-body li { margin-bottom: 5px; }
+        .article-body code {
+            background: #f1f3f5; padding: 2px 7px; border-radius: 4px;
+            font-size: 13.5px; font-family: "Cascadia Code", "Fira Code", Consolas, monospace;
+        }
+        .article-body pre {
+            background: #1e1e1e; color: #d4d4d4; padding: 18px 20px; border-radius: 8px;
+            overflow-x: auto; margin-bottom: 16px; font-size: 13.5px;
+            line-height: 1.6;
+        }
+        .article-body pre code { background: none; padding: 0; color: inherit; font-size: inherit; }
+        .article-body blockquote {
             border-left: 3px solid #ea580c;
-            padding: 8px 16px; margin: 12px 0;
+            padding: 10px 18px; margin: 14px 0;
             background: rgba(234,88,12,0.04); color: var(--text-muted);
+            border-radius: 0 6px 6px 0;
         }
-        .modal-body img { max-width: 100%; border-radius: 8px; margin: 10px 0; }
-        .modal-body strong { color: var(--text-primary); }
-        .modal-body a { color: #d4a017; text-decoration: underline; text-decoration-color: #d4a017; }
-        .modal-body a:hover { color: #b8860b; text-decoration-thickness: 1.5px; }
+        .article-body img { max-width: 100%; border-radius: 8px; margin: 14px 0; }
+        .article-body strong { color: var(--text-primary); }
+        .article-body a { color: #d4a017; text-decoration: underline; text-decoration-color: #d4a017; text-underline-offset: 2px; }
+        .article-body a:hover { color: #b8860b; text-decoration-thickness: 1.5px; }
+        .article-body table {
+            width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 14px;
+        }
+        .article-body th, .article-body td {
+            border: 1px solid var(--border); padding: 8px 12px; text-align: left;
+        }
+        .article-body th { background: var(--tag-bg); font-weight: 600; }
+        .article-body hr {
+            border: none; border-top: 1px solid var(--border); margin: 24px 0;
+        }
 
         /* 页脚 */
         footer { text-align: center; padding: 28px 24px; font-size: 12.5px; color: var(--text-muted); border-top: 1px solid var(--border); }
@@ -165,9 +202,10 @@
 
         @media (max-width: 640px) {
             .main-content { padding: 24px 14px 36px; }
-            .hero { padding: 38px 18px 35px; margin: 0 -14px 28px; border-radius: 8px; }
-            .hero h1 { font-size: 21px; letter-spacing: 1px; }
+            .hero, .article-hero { padding: 38px 18px 35px; margin: 0 -14px 28px; border-radius: 8px; }
+            .hero h1, .article-hero h1 { font-size: 21px; letter-spacing: 1px; }
             .post-card { padding: 18px 20px; }
+            .article-body { font-size: 14.5px; }
         }
     </style>
 </head>
@@ -175,39 +213,51 @@
 
 <main class="main-content">
 
-    <!-- Hero -->
-    <section class="hero">
-        <h1>中国社区昆特主播</h1>
-        <p>来自中国社区的 Gwent 直播主与内容创作者介绍、故事与专访</p>
-    </section>
+    <!-- ========== 列表视图 ========== -->
+    <div class="list-view" id="listView">
 
-    <!-- 返回首页 -->
-    <a href="./" class="back-link">&larr; 返回首页</a>
+        <!-- Hero -->
+        <section class="hero">
+            <h1>中国社区昆特主播</h1>
+            <p>来自中国社区的 Gwent 直播主与内容创作者介绍、故事与专访</p>
+        </section>
 
-    <!-- 列表区域 -->
-    <section class="section" id="streamerList">
-        <div class="section-header">
-            <div class="section-icon"></div>
-            <h2 class="section-title">中国昆特主播大全</h2>
-            <span class="section-subtitle">CN Gwent streamer</span>
-        </div>
-        <div class="post-list" id="postList">
-            <!-- JS动态渲染 -->
-        </div>
-        <div class="pagination" style="display:none;" id="pagination"></div>
-    </section>
+        <!-- 返回首页 -->
+        <a href="./" class="back-link">&larr; 返回首页</a>
+
+        <!-- 列表区域 -->
+        <section class="section" id="streamerList">
+            <div class="section-header">
+                <div class="section-icon"></div>
+                <h2 class="section-title">中国昆特主播大全</h2>
+                <span class="section-subtitle">CN Gwent streamer</span>
+            </div>
+            <div class="post-list" id="postList">
+                <!-- JS动态渲染 -->
+            </div>
+            <div class="pagination" style="display:none;" id="pagination"></div>
+        </section>
+
+    </div>
+
+    <!-- ========== 文章详情视图 ========== -->
+    <div class="article-view" id="articleView">
+        <section class="article-hero">
+            <h1 id="articleTitle"></h1>
+            <div class="article-meta-line" id="articleMetaLine"></div>
+        </section>
+
+        <nav class="article-nav">
+            <span class="article-back" onclick="backToList()">&larr; 返回列表</span>
+            <a id="articleSourceLink" class="article-source-link" target="_blank" rel="noopener noreferrer" style="display:none;">🔗 查看原文</a>
+        </nav>
+
+        <article class="article-body" id="articleBody">
+            <!-- Markdown 渲染内容 -->
+        </article>
+    </div>
 
 </main>
-
-<!-- 文章详情弹窗 -->
-<div class="modal-overlay" id="articleModal" onclick="if(event.target===this)closeModal()">
-    <div class="modal-box">
-        <button class="modal-close" onclick="closeModal()">&times;</button>
-        <h2 class="modal-title" id="modalTitle"></h2>
-        <div class="modal-meta" id="modalMeta"></div>
-        <div class="modal-body" id="modalBody"></div>
-    </div>
-</div>
 
 <footer>
     <p>&copy; 2026 中国社区昆特平衡数据库</p>
@@ -247,6 +297,11 @@ function parseFrontmatter(mdText) {
 
 function renderMd(md) {
     if (!md) return '';
+    // 使用 marked 库渲染（已引入 CDN）
+    if (typeof marked !== 'undefined' && marked.parse) {
+        return marked.parse(md);
+    }
+    // fallback 手动渲染
     let html = md
         .replace(/^### (.*$)/gm, '<h3>$1</h3>')
         .replace(/^## (.*$)/gm, '<h2>$1</h2>')
@@ -272,15 +327,55 @@ function sortByDateDesc(arr) {
     });
 }
 
+// ===== 视图切换 =====
+function showArticleView(file) {
+    document.getElementById('listView').classList.add('hidden');
+    document.getElementById('listView').style.display = 'none';
+    document.getElementById('articleView').classList.add('active');
+    document.getElementById('articleView').style.display = 'block';
+
+    // 从已有数据找，或加载新数据
+    let item = streamerData.find(d => d.file === file);
+    if (!item) return;
+
+    // 渲染标题
+    document.getElementById('articleTitle').textContent = item.fm.title || '';
+    document.getElementById('articleMetaLine').textContent = item.fm.date || '';
+
+    // 原文链接
+    const srcLinkEl = document.getElementById('articleSourceLink');
+    if (item.fm.source_url && item.fm.source_url !== '#') {
+        srcLinkEl.href = item.fm.source_url;
+        srcLinkEl.style.display = 'inline-flex';
+    } else {
+        srcLinkEl.style.display = 'none';
+    }
+
+    // 渲染正文
+    document.getElementById('articleBody').innerHTML = renderMd(item.body);
+
+    // 滚到顶部
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    document.title = (item.fm.title || '') + ' - 中国社区昆特主播';
+}
+
+function backToList() {
+    document.getElementById('articleView').classList.remove('active');
+    document.getElementById('articleView').style.display = 'none';
+    document.getElementById('listView').classList.remove('hidden');
+    document.getElementById('listView').style.display = 'block';
+    history.pushState('', '', './streamers.html');
+    document.title = '中国社区昆特主播 - 中国社区昆特平衡数据库';
+    window.scrollTo({ top: 0, behavior: 'instant' });
+}
+
 // ===== 加载与渲染 =====
 async function loadAndRender() {
     try {
-        // 尝试加载 manifest 获取文件列表
         const res = await fetch('content/manifest.json?t=' + Date.now(), { cache: 'no-store' });
         const manifest = res.ok ? await res.json() : null;
         const files = (manifest && manifest.streamers) || [];
 
-        // 逐个加载
         for (const f of files) {
             try {
                 const r = await fetchNoCache(f);
@@ -292,7 +387,16 @@ async function loadAndRender() {
         }
         sortByDateDesc(streamerData);
 
-        renderList();
+        // 检查 hash 是否指定了某篇文章
+        const hash = location.hash.replace('#', '');
+        if (hash && streamerData.find(d => d.file === hash)) {
+            showArticleView(hash);
+        } else if (hash === '' && streamerData.length === 1) {
+            // 只有1篇文章时自动展示
+            showArticleView(streamerData[0].file);
+        } else {
+            renderList();
+        }
     } catch(e) {
         console.warn('[streamers] 加载失败:', e);
         document.getElementById('postList').innerHTML =
@@ -309,15 +413,12 @@ function renderList() {
     const start = (currentPage - 1) * PAGE_SIZE;
     const pageItems = streamerData.slice(start, start + PAGE_SIZE);
 
-    const tagMap = { 故事: '故事', 教程: '教程', 分析: '分析' };
-
     container.innerHTML = pageItems.length ? pageItems.map(item => {
         const sourceBtn = item.fm.source_url && item.fm.source_url !== '#'
             ? `<a href="${item.fm.source_url}" target="_blank" rel="noopener noreferrer" class="post-source-btn" onclick="event.stopPropagation()">🔗 查看原文</a>` : '';
         return `
             <article class="post-card" data-file="${item.file}">
                 <div class="post-meta">
-                    <span class="tag${item.fm.tag === '故事' ? ' highlight' : ''}">${tagMap[item.fm.tag] || item.fm.tag || ''}</span>
                     <span class="post-date">${item.fm.date || ''}</span>
                 </div>
                 <h3 class="post-title">${item.fm.title || ''}</h3>
@@ -326,12 +427,13 @@ function renderList() {
             </article>`;
     }).join('') : '<div class="empty-state"><p>暂无主播文章</p></div>';
 
-    // 绑定点击
+    // 绑定点击 → 跳转文章页
     container.querySelectorAll('.post-card[data-file]').forEach(card => {
-        card.addEventListener('click', () => openModal(card.dataset.file));
+        card.addEventListener('click', () => {
+            location.hash = card.dataset.file;
+        });
     });
 
-    // 分页
     buildPagination(totalPages);
 }
 
@@ -357,37 +459,16 @@ function goPage(p) {
     renderList();
 }
 
-// ===== 详情弹窗 =====
-const articleCache = {};
-
-async function openModal(file) {
-    try {
-        let data = articleCache[file];
-        if (!data) {
-            const res = await fetchNoCache(file);
-            if (!res.ok) return;
-            const text = await res.text();
-            data = parseFrontmatter(text);
-            articleCache[file] = data;
-        }
-        document.getElementById('modalTitle').textContent = data.frontmatter.title || '';
-        const tagMap = { 故事: '故事', 教程: '教程', 分析: '分析' };
-        const sourceLink = data.frontmatter.source_url && data.frontmatter.source_url !== '#'
-            ? `<a href="${data.frontmatter.source_url}" target="_blank" rel="noopener noreferrer" style="margin-left:12px;color:#ea580c;font-size:13px;font-weight:500;text-decoration:none;">🔗 查看原文</a>` : '';
-        document.getElementById('modalMeta').innerHTML =
-            `<span class="tag${data.frontmatter.tag==='story'?' highlight':''}">${tagMap[data.frontmatter.tag]||data.frontmatter.tag||''}</span>` +
-            ` &nbsp; ${data.frontmatter.date||''}${sourceLink}`;
-        document.getElementById('modalBody').innerHTML = renderMd(data.body);
-        document.getElementById('articleModal').classList.add('active');
-        document.body.style.overflow = 'hidden';
-    } catch(e) { console.warn('Failed to open:', e); }
-}
-
-function closeModal() {
-    document.getElementById('articleModal').classList.remove('active');
-    document.body.style.overflow = '';
-}
-document.addEventListener('keydown', e => { if (e.key==='Escape') closeModal(); });
+// ===== Hash 路由监听 =====
+window.addEventListener('hashchange', () => {
+    const hash = location.hash.replace('#', '');
+    if (hash && streamerData.find(d => d.file === hash)) {
+        showArticleView(hash);
+    } else if (!hash) {
+        backToList();
+        renderList(); // 重新渲染列表
+    }
+});
 
 // ===== 回到顶部 =====
 window.addEventListener('scroll', () => {
