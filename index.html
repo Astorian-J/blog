@@ -689,23 +689,41 @@
             const match = mdText.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n([\s\S]*)$/);
             if (!match) return { frontmatter: {}, body: mdText };
             const fm = {};
-            match[1].split('\n').forEach(line => {
+            const lines = match[1].split('\n');
+            let i = 0;
+            while (i < lines.length) {
+                const line = lines[i];
+                if (!line.trim()) { i++; continue; }
                 const idx = line.indexOf(':');
                 if (idx > 0) {
+                    const key = line.slice(0, idx).trim().toLowerCase();
                     let val = line.slice(idx + 1).trim();
-                    // 处理引号
-                    if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
-                        val = val.slice(1, -1);
-                    } else if (val.toLowerCase() === 'true') {
-                        val = true;
-                    } else if (val.toLowerCase() === 'false') {
-                        val = false;
-                    } else if (!isNaN(val)) {
-                        val = Number(val);
+                    // 检测多行引号值（以 " 或 ' 开头但同行不闭合）
+                    if ((val.startsWith('"') && !val.endsWith('"')) || (val.startsWith("'") && !val.endsWith("'"))) {
+                        const q = val[0];
+                        const parts = [val];
+                        i++;
+                        while (i < lines.length) {
+                            parts.push(lines[i]);
+                            if (lines[i].trim().endsWith(q)) break;
+                            i++;
+                        }
+                        let full = parts.join('\n');
+                        val = full.endsWith(q) ? full.slice(1, -1).trim() : full.slice(1).trim();
+                    } else {
+                        // 单行值：去掉首尾引号
+                        if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+                            val = val.slice(1, -1);
+                        }
                     }
-                    fm[line.slice(0, idx).trim().toLowerCase()] = val;
+                    // 类型转换
+                    if (typeof val === 'string' && val.toLowerCase() === 'true') val = true;
+                    else if (typeof val === 'string' && val.toLowerCase() === 'false') val = false;
+                    else if (typeof val === 'string' && val !== '' && !isNaN(val)) val = Number(val);
+                    fm[key] = val;
                 }
-            });
+                i++;
+            }
             return { frontmatter: fm, body: match[2] };
         }
 
