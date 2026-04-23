@@ -99,6 +99,8 @@ def render_md(md_text):
         return ''
     html = md_text
     # 图片（必须在链接之前处理，避免 ![] 被 [] 吞掉）
+    # posts/*.html 需要相对路径 ../content/...
+    html = re.sub(r'!\[(.*?)\]\((content/[^\)]+)\)', r'<img src="../\2" alt="\1">', html)
     html = re.sub(r'!\[(.*?)\]\((.*?)\)', r'<img src="\2" alt="\1">', html)
     # 链接
     html = re.sub(r'\[(.*?)\]\((.*?)\)', r'<a href="\2" target="_blank">\1</a>', html)
