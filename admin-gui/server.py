@@ -584,8 +584,20 @@ class AdminHandler(SimpleHTTPRequestHandler):
             if new_filename and os.path.basename(old_full) != new_filename:
                 col_folder = os.path.join(CONTENT_DIR, COLLECTIONS[col_name]["folder"]) if col_name else os.path.dirname(old_full)
                 new_full = os.path.join(col_folder, new_filename)
+                
+                # 🔒 防覆盖保护：如果目标文件名已存在且不是当前文件本身，拒绝操作
+                if os.path.isfile(new_full) and os.path.abspath(new_full) != os.path.abspath(old_full):
+                    self.send_json({
+                        'error': f'文件 "{new_filename}" 已存在！请先删除或重命名现有文件，或将月份改回原值。',
+                        'conflict': True,
+                        'existing_file': new_filename
+                    }, status=409)
+                    return
+                
                 if os.path.isfile(old_full):
-                    # 删除旧文件，用新名字创建
+                    # 先备份旧文件（防止重命名后找不到原始数据）
+                    bak_path = old_full + '.bak'
+                    shutil.copy2(old_full, bak_path)
                     os.remove(old_full)
                     file_path = save_file(col_name, new_filename, data, body)
                 else:
