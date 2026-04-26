@@ -38,13 +38,5 @@
   ],
   "survey-link": [
     "content/survey-link/link.md"
-  ],
-  "glossary": [
-    "content/glossary/nilfgaard.md",
-    "content/glossary/narf.md",
-    "content/glossary/meta.md",
-    "content/glossary/buff.md",
-    "content/glossary/bleed-out.md",
-    "content/glossary/balance-council.md"
   ]
 }
