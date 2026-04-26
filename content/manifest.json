@@ -29,9 +29,33 @@
   "survey-link": [
     "content/survey-link/link.md"
   ],
+  "glossary": [
+    "content/glossary/领袖.md",
+    "content/glossary/牢狱之灾.md",
+    "content/glossary/战力.md",
+    "content/glossary/人口.md",
+    "content/glossary/nilfgaard.md",
+    "content/glossary/narf.md",
+    "content/glossary/meta.md",
+    "content/glossary/buff.md",
+    "content/glossary/bleed-out.md",
+    "content/glossary/balance-council.md"
+  ],
   "articles_html": {
     "content/articles/2026-04-20-昆特牌-平衡委员会的作用是什么-成功-失败与民主的类比.md": "posts/20260420-昆特牌-平衡委员会的作用是什么-成功-失败与民主的类比-analysis.html",
     "content/articles/2026-04-21-对于社区问卷的一些看法.md": "posts/20260421-对于社区问卷的一些看法-essay.html",
     "content/articles/2026-04-23-昆特牌-平衡委员会如何运作-Lerio-Shinmiri-投票联盟.md": "posts/20260423-昆特牌-平衡委员会如何运作-Lerio-Shinmiri-投票联盟-analysis.html"
+  },
+  "glossary_html": {
+    "content/glossary/balance-council.md": "glossary/balance-council.html",
+    "content/glossary/bleed-out.md": "glossary/bleed-out.html",
+    "content/glossary/buff.md": "glossary/buff.html",
+    "content/glossary/meta.md": "glossary/meta.html",
+    "content/glossary/narf.md": "glossary/narf.html",
+    "content/glossary/nilfgaard.md": "glossary/nilfgaard.html",
+    "content/glossary/人口.md": "glossary/人口.html",
+    "content/glossary/战力.md": "glossary/战力.html",
+    "content/glossary/牢狱之灾.md": "glossary/牢狱之灾.html",
+    "content/glossary/领袖.md": "glossary/领袖.html"
   }
 }
