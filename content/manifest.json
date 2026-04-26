@@ -22,16 +22,6 @@
     "content/videos/2026-01.md",
     "content/videos/2025-11.md"
   ],
-  "history": [
-    "content/history/2026-04.md",
-    "content/history/2026-03.md",
-    "content/history/2026-02.md",
-    "content/history/2026-01.md",
-    "content/history/2025-12.md",
-    "content/history/2025-11.md",
-    "content/history/2025-10.md",
-    "content/history/2025-09.md"
-  ],
   "bc-recommendations": [],
   "streamers": [
     "content/streamers/2026-04-23-中国昆特牌主播大全.md"
@@ -41,9 +31,13 @@
   ],
   "glossary": [
     "content/glossary/领袖.md",
+    "content/glossary/轮椅-轮椅卡组-无脑卡组.md",
+    "content/glossary/超模.md",
     "content/glossary/牢狱之灾.md",
+    "content/glossary/模型-卡牌模型.md",
     "content/glossary/战力.md",
     "content/glossary/人口.md",
+    "content/glossary/亏模.md",
     "content/glossary/nilfgaard.md",
     "content/glossary/narf.md",
     "content/glossary/meta.md",
@@ -63,9 +57,13 @@
     "content/glossary/meta.md": "glossary/meta.html",
     "content/glossary/narf.md": "glossary/narf.html",
     "content/glossary/nilfgaard.md": "glossary/nilfgaard.html",
+    "content/glossary/亏模.md": "glossary/亏模.html",
     "content/glossary/人口.md": "glossary/人口.html",
     "content/glossary/战力.md": "glossary/战力.html",
+    "content/glossary/模型-卡牌模型.md": "glossary/模型-卡牌模型.html",
     "content/glossary/牢狱之灾.md": "glossary/牢狱之灾.html",
+    "content/glossary/超模.md": "glossary/超模.html",
+    "content/glossary/轮椅-轮椅卡组-无脑卡组.md": "glossary/轮椅-轮椅卡组-无脑卡组.html",
     "content/glossary/领袖.md": "glossary/领袖.html"
   }
 }
