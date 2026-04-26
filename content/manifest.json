@@ -32,6 +32,7 @@
   "glossary": [
     "content/glossary/领袖.md",
     "content/glossary/牢狱之灾.md",
+    "content/glossary/人口.md",
     "content/glossary/nilfgaard.md",
     "content/glossary/narf.md",
     "content/glossary/meta.md",
@@ -51,6 +52,7 @@
     "content/glossary/meta.md": "glossary/meta.html",
     "content/glossary/narf.md": "glossary/narf.html",
     "content/glossary/nilfgaard.md": "glossary/nilfgaard.html",
+    "content/glossary/人口.md": "glossary/人口.html",
     "content/glossary/牢狱之灾.md": "glossary/牢狱之灾.html",
     "content/glossary/领袖.md": "glossary/领袖.html"
   }
