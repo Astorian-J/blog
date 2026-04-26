@@ -114,6 +114,17 @@ COLLECTIONS = {
             {"name": "url", "label": "问卷网址", "type": "text", "required": True, "hint": "平衡民意问卷调查的外部链接地址"},
         ],
     },
+    "glossary": {
+        "label": "📖 昆特术语词典",
+        "folder": "glossary",
+        "slug_format": "{slug}",
+        "fields": [
+            {"name": "cn_name", "label": "中文名称", "type": "text", "required": True, "hint": "中文术语名称，如：平衡委员会"},
+            {"name": "en_name", "label": "英文名称", "type": "text", "required": True, "hint": "英文术语名称，如：Balance Council (BC)"},
+            {"name": "category", "label": "分类", "type": "select", "options": ["机制", "卡牌效果", "派系术语", "赛事术语", "社区用语", "其他"]},
+            {"name": "description", "label": "含义与解释", "type": "textarea", "required": True, "hint": "详细解释该术语的含义、用法、来源等"},
+        ],
+    },
 }
 
 # ==================== 工具函数 ====================

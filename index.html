@@ -419,6 +419,47 @@
         .modal-body a { color: #d4a017; text-decoration: underline; text-decoration-color: #d4a017; }
         .modal-body a:hover { color: #b8860b; text-decoration-thickness: 1.5px; }
 
+        /* ===== 术语词典 ===== */
+        .glossary-search-bar { margin: 20px auto 16px; max-width: 560px; }
+        .glossary-search-bar input {
+            width: 100%; padding: 14px 20px; font-size: 15.5px;
+            border: 2px solid var(--border); border-radius: 12px;
+            outline: none; transition: border-color 0.25s;
+            background: var(--card-bg); color: var(--text-primary);
+        }
+        .glossary-search-bar input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37,99,235,0.12); }
+        .glossary-filters {
+            display: flex; gap: 8px; margin-bottom: 18px; justify-content: center;
+            flex-wrap: wrap;
+        }
+        .glossary-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; min-height: 120px; }
+        .glossary-card {
+            background: var(--card-bg); border: 1px solid var(--border);
+            border-radius: 12px; padding: 18px 22px; cursor: pointer;
+            transition: all 0.2s ease; display: flex; align-items: center; gap: 16px;
+        }
+        .glossary-card:hover {
+            border-color: var(--accent); box-shadow: 0 4px 16px rgba(37,99,235,0.10);
+            transform: translateY(-2px);
+        }
+        .glossary-card-cn { font-size: 17px; font-weight: 700; color: var(--text-primary); white-space: nowrap; }
+        .glossary-card-en { font-size: 13px; color: var(--text-secondary); opacity: 0.85; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px; }
+        .glossary-card-cat { 
+            font-size: 11px; color: #fff; background: var(--accent); padding: 2px 8px; border-radius: 6px; 
+            white-space: nowrap; flex-shrink: 0;
+        }
+        .glossary-empty { grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-muted); }
+        
+        /* 词典详情弹窗 */
+        .glossary-modal-box { max-width: 520px; width: 90%; }
+        .glossary-detail-cn { font-size: 24px; font-weight: 800; color: var(--text-primary); margin-bottom: 4px; }
+        .glossary-detail-en { font-size: 15px; color: var(--accent); font-weight: 600; margin-bottom: 8px; }
+        .glossary-detail-cat { 
+            display: inline-block; font-size: 12px; color: #fff; background: var(--accent); 
+            padding: 3px 12px; border-radius: 8px; margin-bottom: 16px;
+        }
+        .glossary-detail-desc { font-size: 14.5px; line-height: 1.85; color: var(--text-secondary); white-space: pre-line; }
+
         /* ===== 响应式 ===== */
         @media (max-width: 640px) {
             .navbar { padding: 0 20px; }
@@ -454,6 +495,11 @@
                 justify-content: center;
             }
         }
+        /* 移动端词典 */
+        .glossary-search-bar input { width: 100% !important; font-size: 15px; }
+        .glossary-filters { flex-wrap: wrap; gap: 6px !important; }
+        .glossary-filters .filter-btn { padding: 7px 12px; font-size: 13px; }
+        .glossary-card { flex-direction: column; align-items: flex-start !important; }
     </style>
 </head>
 <body>
@@ -466,6 +512,7 @@
             <li><a href="javascript:;" data-tab="articles" data-i18n="nav_articles">文章发布</a></li>
             <li><a href="javascript:;" data-tab="survey-data" data-i18n="nav_data">问卷数据</a></li>
             <li><a href="javascript:;" data-tab="videos" data-i18n="nav_videos">平衡视频</a></li>
+            <li><a href="javascript:;" data-tab="glossary" data-i18n="nav_glossary">术语词典</a></li>
         </ul>
         <div style="display:flex;align-items:center;gap:16px;">
             <div class="lang-switch" id="langSwitch" onclick="toggleLang()">
@@ -567,6 +614,52 @@
         </section>
         </div>
 
+        <!-- 术语词典面板 -->
+        <div class="tab-panel" id="panel-glossary">
+        <section class="section" style="margin-top:20px;">
+            <div class="section-header">
+                <div class="section-icon"></div>
+                <h2 class="section-title">📖 昆特牌术语词典</h2>
+                <span class="section-subtitle">Gwent Terminology Dictionary</span>
+            </div>
+
+            <!-- 搜索栏 -->
+            <div class="glossary-search-bar" id="glossarySearchBar">
+                <input type="text" id="glossarySearchInput" 
+                       placeholder="🔍 输入中文或英文搜索术语..." 
+                       autocomplete="off"
+                       oninput="renderGlossaryList()">
+            </div>
+
+            <!-- 分类筛选 -->
+            <div class="glossary-filters" id="glossaryFilters">
+                <button class="filter-btn active" data-gf="all">全部</button>
+                <button class="filter-btn" data-gf="机制">机制</button>
+                <button class="filter-btn" data-gf="卡牌效果">卡牌效果</button>
+                <button class="filter-btn" data-gf="派系术语">派系术语</button>
+                <button class="filter-btn" data-gf="赛事术语">赛事术语</button>
+                <button class="filter-btn" data-gf="社区用语">社区用语</button>
+                <button class="filter-btn" data-gf="其他">其他</button>
+            </div>
+
+            <!-- 词典列表 -->
+            <div class="glossary-list" id="glossaryList">
+                <div class="empty-state"><div class="spinner"></div></div>
+            </div>
+
+            <!-- 词条详情弹窗 -->
+            <div class="modal-overlay" id="glossaryModal" onclick="if(event.target===this)closeGlossaryModal()" style="display:none;">
+                <div class="modal-box glossary-modal-box">
+                    <button class="modal-close" onclick="closeGlossaryModal()">&times;</button>
+                    <div class="glossary-detail-cn" id="gmCnName"></div>
+                    <div class="glossary-detail-en" id="gmEnName"></div>
+                    <div class="glossary-detail-cat" id="gmCategory"></div>
+                    <div class="glossary-detail-desc" id="gmDescription"></div>
+                </div>
+            </div>
+        </section>
+        </div>
+
 
     <!-- 文章详情弹窗 -->
     <div class="modal-overlay" id="articleModal" onclick="if(event.target===this)closeModal()">
@@ -595,7 +688,7 @@
             zh: {
                 logo: '昆特<span>平衡数据库</span>',
                 nav_news: '最新资讯', nav_articles: '文章发布',
-                nav_data: '问卷数据', nav_videos: '平衡视频',
+                nav_data: '问卷数据', nav_videos: '平衡视频', nav_glossary: '术语词典',
                 hero_title: '中国社区昆特平衡数据库',
                 hero_desc: '记录每一次社区平衡投票，用数据见证昆特环境的变迁',
                 sec_news: '最新平衡资讯', sec_news_sub: 'Latest News',
@@ -691,7 +784,8 @@
             // 触发对应板块的数据渲染（确保首次切换时加载数据）
             if (tabId === 'articles' && _articlesData.length === 0) renderArticles();
             else if (tabId === 'survey-data' && _surveyData.length === 0) renderSurveyData();
-            else             if (tabId === 'videos' && _videoData.length === 0) renderVideos();
+            else if (tabId === 'videos' && _videoData.length === 0) renderVideos();
+            else if (tabId === 'glossary' && _glossaryData.length === 0) renderGlossary();
         }
 
         // 导航链接点击 → 标签切换
@@ -1054,6 +1148,104 @@
             }
             if (html) container.innerHTML = html;
             buildPagination('videos');
+        }
+
+        // ========== 术语词典 ==========
+        let _glossaryData = [];
+        let _glossaryFilter = 'all';
+
+        async function renderGlossary() {
+            const container = document.getElementById('glossaryList');
+            const files = contentManifest.glossary || [];
+
+            if (_glossaryData.length === 0) {
+                for (const f of files) {
+                    try {
+                        const res = await fetchNoCache(f);
+                        if (!res.ok) continue;
+                        const text = await res.text();
+                        const { frontmatter: fm } = parseFrontmatter(text);
+                        _glossaryData.push({ file: f, fm });
+                    } catch(e) { /* skip */ }
+                }
+            }
+            renderGlossaryList();
+        }
+
+        function renderGlossaryList() {
+            const container = document.getElementById('glossaryList');
+            const query = (document.getElementById('glossarySearchInput')?.value || '').trim().toLowerCase();
+            const filterCat = _glossaryFilter;
+
+            let items = _glossaryData;
+            
+            // 分类筛选
+            if (filterCat !== 'all') {
+                items = items.filter(item => item.fm.category === filterCat);
+            }
+            
+            // 搜索筛选（中英文双向）
+            if (query) {
+                items = items.filter(item => 
+                    (item.fm.cn_name && item.fm.cn_name.toLowerCase().includes(query)) ||
+                    (item.fm.en_name && item.fm.en_name.toLowerCase().includes(query))
+                );
+            }
+
+            // 排序：按中文拼音/英文首字母
+            items.sort((a, b) => (a.fm.cn_name || '').localeCompare(b.fm.cn_name || '', 'zh'));
+
+            if (!items.length) {
+                container.innerHTML = '<div class="glossary-empty">📖 没有找到匹配的术语</div>';
+                return;
+            }
+
+            let html = '';
+            for (const item of items) {
+                const cn = item.fm.cn_name || '';
+                const en = item.fm.en_name || '';
+                const cat = item.fm.category || '其他';
+                const idx = _glossaryData.indexOf(item); // 用索引定位
+                html += `
+                    <div class="glossary-card" onclick="showGlossaryDetail(${idx})">
+                        <span class="glossary-card-cat">${cat}</span>
+                        <div style="flex:1;min-width:0;">
+                            <div class="glossary-card-cn">${cn}</div>
+                            <div class="glossary-card-en">${en}</div>
+                        </div>
+                        <span style="color:var(--text-muted);flex-shrink:0;">›</span>
+                    </div>`;
+            }
+            container.innerHTML = html;
+
+            // 绑定分类筛选按钮
+            const filtersEl = document.getElementById('glossaryFilters');
+            if (!filtersEl.dataset.bound) {
+                filtersEl.querySelectorAll('.filter-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        filtersEl.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        _glossaryFilter = btn.dataset.gf;
+                        renderGlossaryList();
+                    });
+                });
+                filtersEl.dataset.bound = '1';
+            }
+        }
+
+        function showGlossaryDetail(idx) {
+            const item = _glossaryData[idx];
+            if (!item) return;
+            const fm = item.fm;
+            document.getElementById('gmCnName').textContent = fm.cn_name || '';
+            document.getElementById('gmEnName').textContent = fm.en_name || '';
+            document.getElementById('gmCategory').textContent = fm.category || '';
+            document.getElementById('gmDescription').textContent = fm.description || '';
+            document.getElementById('glossaryModal').style.display = 'flex';
+        }
+
+        function closeGlossaryModal() {
+            document.getElementById('glossaryModal').style.display = 'none';
         }
 
         // ===== 通用分页工具 =====
