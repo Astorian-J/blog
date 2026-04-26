@@ -6,24 +6,6 @@
     <title>中国社区昆特平衡数据库</title>
     <!-- Markdown 渲染器（本地化，避免CDN不可达） -->
     <script src="marked.min.js"></script>
-    <!-- 错误诊断：捕获并显示JS错误 -->
-    <script>
-      window._jsErrors = [];
-      window.onerror = function(msg, src, line, col, err) {
-        window._jsErrors.push({msg:String(msg).substring(0,200), src:src||'', line:line||0, col:col||0});
-        var eb = document.getElementById('_errBoard');
-        if (!eb) {
-          eb = document.createElement('div'); eb.id = '_errBoard';
-          eb.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:999999;background:#ff3333;color:#fff;padding:12px 16px;font-family:monospace;font-size:13px;cursor:pointer';
-          eb.onclick = function() { this.style.display = 'none'; };
-          document.body.appendChild(eb);
-        }
-        eb.innerHTML = '⚠️ JS Error #' + window._jsErrors.length + ': ' + String(msg).substring(0,120) + ' (' + (src||'').split('/').pop() + ':' + line + ') — 点击关闭';
-        eb.style.display = 'block';
-        console.error('[DIAG]', msg, src, line, col, err);
-        return false;
-      };
-    </script>
     <style>
         /* ===== 重置与基础 ===== */
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -1431,9 +1413,7 @@
 
         // ===== 启动 =====
         document.addEventListener('DOMContentLoaded', () => {
-            console.log('[DIAG] ✅ DOMContentLoaded fired, starting renderAllContent...');
-            try { renderAllContent(); console.log('[DIAG] ✅ renderAllContent completed'); }
-            catch(e) { console.error('[DIAG] ❌ renderAllContent error:', e); window._jsErrors.push({msg:'renderAllContent: '+e.message}); window.onerror(e.message, 'index.html', 0, 0, e); }
+            renderAllContent();
         });
 
         // CMS 身份验证回调
@@ -1442,17 +1422,6 @@
                 if (!user) window.NetlifyIdentity.on('login', () => location.href = '/admin/');
             });
         }
-
-        /* 启动诊断：3秒后如果没报错，显示绿色OK条 */
-        setTimeout(function() {
-          if (!window._jsErrors || window._jsErrors.length === 0) {
-            var ok = document.createElement('div');
-            ok.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:999998;background:#16a34a;color:#fff;padding:6px 16px;font-size:12px;font-family:monospace;text-align:center;opacity:0.85';
-            ok.textContent = '✅ JS 执行正常 — ' + new Date().toLocaleTimeString();
-            document.body.appendChild(ok);
-            setTimeout(function() { ok.style.transition = 'opacity 1s'; ok.style.opacity = '0'; setTimeout(function(){ok.remove();},1000); }, 2500);
-          }
-        }, 3000);
     </script>
 
 </body>
