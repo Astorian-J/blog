@@ -654,10 +654,13 @@ async function renderEditForm(colName, values) {
             <button type="button" class="btn btn-sm" style="background:var(--bg-tertiary);border-color:#0891b2;color:#22d3ee;padding:5px 14px;font-size:12px;border-radius:6px;display:inline-flex;align-items:center;gap:4px;" onclick="insertFontSize('f_${field.name}')">A 字号</button>
             <span id="img-status-${field.name}" style="font-size:12px;color:var(--text-secondary);"></span>
           </div>` : '';
-        // 普通 textarea（如内容摘要）：只给超链接按钮
+        // 普通 textarea（如内容摘要）：给超链接按钮；词典描述额外加"插入词条"按钮
+        const glossaryBtn = (!isMarkdown && colName === 'glossary' && field.name === 'description') ? 
+          `<button type="button" class="btn btn-sm" style="background:#eff6ff;border-color:#2563eb;color:#2563eb;padding:5px 14px;font-size:12px;border-radius:6px;display:inline-flex;align-items:center;gap:4px;" onclick="showGlossaryPicker('f_${field.name}')">📖 插入词条</button>` : '';
         const txtToolbar = !isMarkdown ? `
           <div style="display:flex;align-items:center;gap:10px;margin-top:6px;">
             <button type="button" class="btn btn-sm" style="background:var(--bg-tertiary);border-color:#d4a017;color:#e8c547;padding:5px 14px;font-size:12px;border-radius:6px;display:inline-flex;align-items:center;gap:4px;" onclick="insertLink('f_${field.name}')">🔗 插入超链接</button>
+            ${glossaryBtn}
           </div>` : '';
         const uploadBtn = mdToolbar || txtToolbar;
         const hint = field.hint ? `<div class="editor-hint">${field.hint}</div>` : '';
@@ -902,6 +905,99 @@ function insertLink(textareaId) {
   ta.setRangeText(mdLink, start, end, 'end');
   // 光标移到末尾方便继续编辑
   ta.dispatchEvent(new Event('input', { bubbles: true }));
+}
+
+// ==================== 词条选择器（词典描述字段专用） ====================
+let _glossaryTermsCache = null;  // 缓存词条列表
+
+async function showGlossaryPicker(textareaId) {
+  const ta = document.getElementById(textareaId);
+  if (!ta) return;
+
+  // 获取或缓存词条列表
+  if (!_glossaryTermsCache) {
+    try {
+      const res = await fetch(`${API}/api/glossary/files`);
+      const data = await res.json();
+      const files = data.glossary || [];
+      _glossaryTermsCache = [];
+      for (const f of files) {
+        try {
+          const r2 = await fetch(`${API}/api/file/${encodeURIComponent(f.path)}`);
+          const d = await r2.json();
+          _glossaryTermsCache.push(d.frontmatter || {});
+        } catch(e) {}
+      }
+      // 按中文排序
+      _glossaryTermsCache.sort((a,b) => (a.cn_name||'').localeCompare(b.cn_name||'','zh'));
+    } catch(err) {
+      alert('无法加载词条列表：' + err.message);
+      return;
+    }
+  }
+
+  if (_glossaryTermsCache.length === 0) {
+    alert('当前没有任何词条，请先添加一些术语。');
+    return;
+  }
+
+  // 构建弹窗 HTML
+  const termsHtml = _glossaryTermsCache.map(t =>
+    `<div class="glossary-pick-item" data-cn="${(t.cn_name||'').replace(/"/g,'&quot;')}" data-en="${(t.en_name||'').replace(/"/g,'&quot;')}"
+         style="display:flex;align-items:center;gap:10px;padding:9px 14px;border-radius:8px;cursor:pointer;border:1px solid var(--border);margin-bottom:6px;transition:all .15s;"
+         onmouseover="this.style.borderColor='var(--accent)';this.style.background='rgba(37,99,235,.04)'" 
+         onmouseout="this.style.borderColor='var(--border)';this.style.background=''">
+      <span style="font-size:11px;color:#fff;background:var(--accent);padding:2px 8px;border-radius:5px;flex-shrink:0;">${t.category||''}</span>
+      <span style="font-weight:600;font-size:14px;color:var(--text-primary);">${t.cn_name||''}</span>
+      <span style="font-size:12px;color:var(--text-muted);">${t.en_name||''}</span>
+    </div>`
+  ).join('');
+
+  const overlayId = 'glossaryPickOverlay';
+  // 如果已有则移除
+  let oldEl = document.getElementById(overlayId);
+  if (oldEl) oldEl.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = overlayId;
+  overlay.innerHTML = `
+    <div style="position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;" onclick="if(event.target===this)this.remove()">
+      <div style="background:var(--card-bg);border-radius:14px;width:100%;max-width:440px;max-height:70vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.2);">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);">
+          <span style="font-size:16px;font-weight:700;">📖 选择要链接的词条</span>
+          <button onclick="document.getElementById('${overlayId}').remove()" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--text-muted);line-height:1;padding:0 4px;">&times;</button>
+        </div>
+        <div style="padding:16px 20px;overflow-y:auto;flex:1;">
+          <div style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">点击词条名称即可插入，构建时将自动转为超链接</div>
+          ${termsHtml}
+        </div>
+        <div style="padding:12px 20px;border-top:1px solid var(--border);font-size:11.5px;color:var(--text-muted);text-align:center;">
+          提示：直接在描述中写「平衡委员会」「Nerf」等词也会被自动识别并超链接
+        </div>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+
+  // 绑定点击事件
+  overlay.querySelectorAll('.glossary-pick-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const cnName = item.dataset.cn;
+      if (!cnName) return;
+      
+      // 插入到光标位置
+      const pos = ta.selectionStart;
+      const textBefore = ta.value.slice(0, pos);
+      const textAfter = ta.value.slice(ta.selectionEnd ?? pos);
+      ta.value = textBefore + cnName + textAfter;
+      ta.focus();
+      // 设置光标到插入文字之后
+      ta.setSelectionRange(pos + cnName.length, pos + cnName.length);
+      ta.dispatchEvent(new Event('input', { bubbles: true }));
+      
+      // 关闭弹窗
+      overlay.remove();
+    });
+  });
 }
 
 // ==================== 插入粗体（Markdown 编辑器） ====================

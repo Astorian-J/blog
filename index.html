@@ -512,7 +512,7 @@
             <li><a href="javascript:;" data-tab="articles" data-i18n="nav_articles">文章发布</a></li>
             <li><a href="javascript:;" data-tab="survey-data" data-i18n="nav_data">问卷数据</a></li>
             <li><a href="javascript:;" data-tab="videos" data-i18n="nav_videos">平衡视频</a></li>
-            <li><a href="javascript:;" data-tab="glossary" data-i18n="nav_glossary">术语词典</a></li>
+            <li><a href="glossary/index.html" data-i18n="nav_glossary">术语词典</a></li>
         </ul>
         <div style="display:flex;align-items:center;gap:16px;">
             <div class="lang-switch" id="langSwitch" onclick="toggleLang()">
@@ -620,7 +620,7 @@
             <div class="section-header">
                 <div class="section-icon"></div>
                 <h2 class="section-title">📖 昆特牌术语词典</h2>
-                <span class="section-subtitle">Gwent Terminology Dictionary</span>
+                <span class="section-subtitle">Gwent Terminology Dictionary <a href="glossary/index.html" style="color:var(--accent);font-weight:500;margin-left:6px;">→ 独立版</a></span>
             </div>
 
             <!-- 搜索栏 -->
@@ -1167,9 +1167,33 @@
                         const { frontmatter: fm } = parseFrontmatter(text);
                         _glossaryData.push({ file: f, fm });
                     } catch(e) { /* skip */ }
+                    }
                 }
             }
             renderGlossaryList();
+        }
+
+        /**
+         * 跳转到词条独立页面（与 goToArticle 逻辑一致）
+         * 从 manifest.glossary_html 映射表查找对应路径
+         */
+        function goToGlossaryTerm(mdFile) {
+            const htmlMap = contentManifest.glossary_html || {};
+            let targetPath = htmlMap[mdFile];
+            // 尝试用完整路径或纯文件名作为 key 查找
+            if (!targetPath) {
+                const fileName = mdFile.split('/').pop();
+                for (const [k, v] of Object.entries(htmlMap)) {
+                    if (k.endsWith(fileName) || k === fileName) { targetPath = v; break; }
+                }
+            }
+            if (targetPath) {
+                window.location.href = targetPath;
+            } else {
+                // fallback：如果还没有构建出静态页（本地开发时），显示旧弹窗
+                const idx = _glossaryData.findIndex(item => item.file === mdFile);
+                if (idx >= 0) showGlossaryDetail(idx);
+            }
         }
 
         function renderGlossaryList() {
@@ -1205,9 +1229,8 @@
                 const cn = item.fm.cn_name || '';
                 const en = item.fm.en_name || '';
                 const cat = item.fm.category || '其他';
-                const idx = _glossaryData.indexOf(item); // 用索引定位
                 html += `
-                    <div class="glossary-card" onclick="showGlossaryDetail(${idx})">
+                    <div class="glossary-card" onclick="goToGlossaryTerm('${item.file}')">
                         <span class="glossary-card-cat">${cat}</span>
                         <div style="flex:1;min-width:0;">
                             <div class="glossary-card-cn">${cn}</div>

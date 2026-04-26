@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>增强 - Buff;Boost | 昆特牌术语词典</title>
+    <style>
+        /* ===== 重置与基础 ===== */
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg: #fafafa;
+            --card-bg: #ffffff;
+            --text-primary: #1a1a1a;
+            --text-secondary: #666666;
+            --text-muted: #999999;
+            --accent: #2563eb;
+            --accent-hover: #1d4ed8;
+            --border: #e5e5e5;
+            --tag-bg: #f0f0f0;
+            --nav-bg: rgba(255,255,255,0.92);
+        }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            background: var(--bg); color: var(--text-primary); line-height: 1.7; min-height: 100vh;
+        }
+        a { color: var(--accent); text-decoration: none; transition: color 0.2s; }
+        a:hover { color: var(--accent-hover); }
+
+        /* ===== 导航栏 ===== */
+        .navbar {
+            position: fixed; top: 0; left: 0; right: 0; height: 60px;
+            background: var(--nav-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border); display: flex; align-items: center;
+            justify-content: space-between; padding: 0 40px; z-index: 1000;
+        }
+        .logo a { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; color: var(--text-primary); text-decoration: none !important; }
+        .logo a span { color: var(--accent); }
+        .logo a:hover span { color: var(--accent-hover); }
+        .nav-breadcrumb { font-size: 13px; color: var(--text-muted); }
+        .nav-breadcrumb a { color: var(--accent); font-weight: 500; }
+        .nav-breadcrumb a:hover { text-decoration: underline; }
+        .nav-breadcrumb .sep { margin: 0 8px; }
+
+        /* ===== 主内容区 ===== */
+        .main-content { max-width: 720px; margin: 0 auto; padding: 90px 24px 60px; }
+
+        /* ===== 词条头部 ===== */
+        .term-header { margin-bottom: 36px; padding-bottom: 24px; border-bottom: 2px solid var(--border); }
+        .term-category {
+            display: inline-block; font-size: 12px; font-weight: 600; color: #fff;
+            background: var(--accent); padding: 4px 14px; border-radius: 20px; margin-bottom: 16px;
+        }
+        .term-cn { font-size: 32px; font-weight: 800; color: var(--text-primary); margin-bottom: 6px; line-height: 1.3; }
+        .term-en { font-size: 18px; color: var(--accent); font-weight: 600; margin-bottom: 0; letter-spacing: 0.3px; }
+
+        /* ===== 词条正文 ===== */
+        .term-body {
+            font-size: 15.5px; line-height: 1.95; color: var(--text-secondary);
+            padding-bottom: 48px;
+        }
+        .term-body p { margin-bottom: 16px; }
+        .term-body strong { color: var(--text-primary); }
+        .term-body code {
+            background: #f1f3f5; padding: 2px 7px; border-radius: 4px; font-size: 13.5px;
+        }
+        .term-body blockquote {
+            border-left: 3px solid var(--accent); padding: 10px 18px; margin: 16px 0;
+            background: rgba(37,99,235,0.04); color: var(--text-muted); border-radius: 0 8px 8px 0;
+        }
+        /* 词条内超链接样式（跳转到其他词条） */
+        .term-body .glossary-link {
+            color: var(--accent); font-weight: 500; border-bottom: 1.5px dashed var(--accent);
+            border-radius: 0; transition: all 0.2s; white-space: nowrap;
+        }
+        .term-body .glossary-link:hover {
+            color: var(--accent-hover); border-bottom-style: solid; background: rgba(37,99,235,0.05);
+        }
+
+        /* ===== 相关词条推荐 ===== */
+        .related-terms { margin-top: 48px; padding-top: 28px; border-top: 1px solid var(--border); }
+        .related-title { font-size: 15px; font-weight: 700; color: var(--text-primary); margin-bottom: 14px; }
+        .related-list { display: flex; flex-wrap: wrap; gap: 10px; }
+        .related-tag {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 7px 16px; border-radius: 20px; font-size: 13.5px; font-weight: 500;
+            background: var(--tag-bg); color: var(--text-secondary); border: 1px solid var(--border);
+            transition: all 0.2s;
+        }
+        .related-tag:hover { border-color: var(--accent); color: var(--accent); background: rgba(37,99,235,0.04); }
+        .related-tag .arrow { opacity: 0; transition: opacity 0.2s; font-size: 12px; }
+        .related-tag:hover .arrow { opacity: 1; }
+
+        /* ===== 页脚 ===== */
+        footer {
+            text-align: center; padding: 28px 24px; font-size: 12.5px;
+            color: var(--text-muted); border-top: 1px solid var(--border);
+        }
+        footer a { color: var(--text-secondary); }
+
+        /* ===== 响应式 ===== */
+        @media (max-width: 640px) {
+            .navbar { padding: 0 20px; }
+            .main-content { padding: 74px 16px 40px; }
+            .term-cn { font-size: 25px; }
+            .term-en { font-size: 15.5px; }
+            .term-body { font-size: 14.5px; }
+            .nav-breadcrumb { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- 导航栏 -->
+<nav class="navbar">
+    <div class="logo"><a href="../"><span>昆特</span>平衡数据库</a></div>
+    <div class="nav-breadcrumb">
+        <a href="./">术语词典</a><span class="sep">›</span>
+        增强
+    </div>
+</nav>
+
+<!-- 主内容 -->
+<main class="main-content">
+
+    <!-- 词条头部 -->
+    <header class="term-header">
+        <span class="term-category">社区用语</span>
+        <h1 class="term-cn">增强</h1>
+        <p class="term-en">Buff;Boost</p>
+    </header>
+
+    <!-- 词条描述 -->
+    <div class="term-body">
+<p>指提升某张卡牌的强度，通常是增加战力值或增强效果。与<a href="narf.html" class="glossary-link">削弱</a>(<a href="narf.html" class="glossary-link">Nerf</a>)相对。</p>
+    </div>
+
+    <!-- 相关词条 -->
+    <section class="related-terms" id="relatedTerms" style="">
+        <h2 class="related-title">📗 相关术语</h2>
+        <div class="related-list">
+        <a href="meta.html" class="related-tag">环境<span class="arrow">→</span></a>
+        <a href="narf.html" class="related-tag">削弱<span class="arrow">→</span></a>
+        <a href="balance-council.html" class="related-tag">平衡委员会<span class="arrow">→</span></a>
+        <a href="bleed-out.html" class="related-tag">拔河<span class="arrow">→</span></a>
+        <a href="nilfgaard.html" class="related-tag">尼弗迦德<span class="arrow">→</span></a>
+
+        </div>
+    </section>
+
+</main>
+
+<!-- 页脚 -->
+<footer>
+    <p>&copy; 2026 中国社区昆特平衡数据库 &nbsp;·&nbsp; <a href="../#glossary">返回词典首页</a></p>
+</footer>
+
+</body>
+</html>

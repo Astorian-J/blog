@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>昆特牌术语词典 | 中国社区昆特平衡数据库</title>
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg: #fafafa; --card-bg: #ffffff;
+            --text-primary: #1a1a1a; --text-secondary: #666666;
+            --text-muted: #999999; --accent: #2563eb; --border: #e5e5e5;
+            --nav-bg: rgba(255,255,255,0.92); --tag-bg: #f0f0f0;
+        }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            background: var(--bg); color: var(--text-primary); line-height: 1.7; min-height: 100vh;
+        }
+        a { color: inherit; text-decoration: none; }
+        a:hover { color: var(--accent); }
+
+        /* 导航栏 */
+        .navbar {
+            position: fixed; top: 0; left: 0; right: 0; height: 60px;
+            background: var(--nav-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border); display: flex; align-items: center;
+            justify-content: space-between; padding: 0 40px; z-index: 1000;
+        }
+        .logo a { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; color: var(--text-primary); text-decoration: none !important; }
+        .logo a span { color: var(--accent); }
+        .nav-home { font-size: 13px; color: var(--accent); font-weight: 500; }
+        .nav-home:hover { text-decoration: underline; }
+
+        /* 主内容 */
+        .main-content { max-width: 880px; margin: 0 auto; padding: 90px 24px 60px; }
+
+        /* 页面标题 */
+        .page-header { text-align: center; margin-bottom: 36px; padding: 32px 20px; background: linear-gradient(135deg,#2a2a2a 0%,#111 100%); border-radius: 12px; color: #fff; position: relative; overflow: hidden; }
+        .page-header::before { content:'';position:absolute;inset:0;background:radial-gradient(circle at 30% 50%,rgba(37,99,235,.08),transparent 55%);pointer-events:none; }
+        .page-header h1 { font-size: 28px; font-weight: 800; letter-spacing: 1px; margin-bottom: 8px; position: relative; }
+        .page-header p { font-size: 14px; opacity: 0.6; position: relative; }
+        .page-header .count-badge { display: inline-block; margin-top: 10px; font-size: 13px; background: rgba(255,255,255,.1); padding: 4px 14px; border-radius: 20px; position: relative; }
+
+        /* 搜索 */
+        .search-bar { margin: 24px auto 16px; max-width: 560px; }
+        .search-bar input {
+            width: 100%; padding: 14px 20px; font-size: 15.5px; border: 2px solid var(--border);
+            border-radius: 12px; outline: none; transition: border-color .25s;
+            background: var(--card-bg); color: var(--text-primary);
+        }
+        .search-bar input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37,99,235,.12); }
+
+        /* 筛选 */
+        .filters { display: flex; gap: 8px; margin-bottom: 22px; justify-content: center; flex-wrap: wrap; }
+        .filter-btn {
+            padding: 6px 18px; border-radius: 20px; font-size: 13.5px; font-weight: 500;
+            background: var(--tag-bg); color: var(--text-secondary); border: 1px solid transparent;
+            cursor: pointer; transition: all .2s; user-select: none;
+        }
+        .filter-btn:hover { border-color: var(--border); }
+        .filter-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+        /* 词条列表 */
+        .term-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; min-height: 120px; }
+        .term-card {
+            background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px;
+            padding: 18px 22px; transition: all .2s ease; display: flex; align-items: center; gap: 16px;
+            text-decoration: none !important;
+        }
+        .term-card:hover { border-color: var(--accent); box-shadow: 0 4px 16px rgba(37,99,235,.10); transform: translateY(-2px); }
+        .term-cat { font-size: 11px; color: #fff; background: var(--accent); padding: 2px 8px; border-radius: 6px; white-space: nowrap; flex-shrink: 0; }
+        .term-info { flex: 1; min-width: 0; }
+        .term-cn-name { font-size: 17px; font-weight: 700; color: var(--text-primary); white-space: nowrap; }
+        .term-en-name { font-size: 13px; color: var(--text-secondary); opacity: .85; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px; }
+        .empty-state { grid-column: 1/-1; text-align: center; padding: 48px 20px; color: var(--text-muted); font-size: 15px; }
+
+        /* 页脚 */
+        footer { text-align: center; padding: 28px 24px; font-size: 12.5px; color: var(--text-muted); border-top: 1px solid var(--border); }
+        footer a { color: var(--text-secondary); }
+
+        @media (max-width: 640px) {
+            .navbar { padding: 0 20px; }
+            .main-content { padding: 74px 14px 36px; }
+            .page-header h1 { font-size: 21px; }
+            .term-list { grid-template-columns: 1fr; }
+            .term-card { flex-direction: column; align-items: flex-start !important; gap: 10px; }
+            .filters { gap: 6px; } .filter-btn { padding: 7px 12px; font-size: 13px; }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="logo"><a href="../"><span>昆特</span>平衡数据库</a></div>
+    <a href="../" class="nav-home">← 返回首页</a>
+</nav>
+
+<main class="main-content">
+
+    <div class="page-header">
+        <h1>📖 昆特牌术语词典</h1>
+        <p>Gwent Terminology Dictionary — 中英文对照 · 可点击跳转查看详情</p>
+        <span class="count-badge">共 6 个术语</span>
+    </div>
+
+    <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="🔍 输入中文或英文搜索术语..." autocomplete="off" oninput="renderList()">
+    </div>
+
+    <div class="filters" id="filters">
+        <button class="filter-btn active" data-cat="all" onclick="setFilter(this)">全部</button>
+        <button class="filter-btn" data-cat="机制" onclick="setFilter(this)">机制</button>
+        <button class="filter-btn" data-cat="卡牌效果" onclick="setFilter(this)">卡牌效果</button>
+        <button class="filter-btn" data-cat="派系术语" onclick="setFilter(this)">派系术语</button>
+        <button class="filter-btn" data-cat="赛事术语" onclick="setFilter(this)">赛事术语</button>
+        <button class="filter-btn" data-cat="社区用语" onclick="setFilter(this)">社区用语</button>
+        <button class="filter-btn" data-cat="其他" onclick="setFilter(this)">其他</button>
+    </div>
+
+    <div class="term-list" id="termList"></div>
+
+</main>
+
+<footer><p>&copy; 2026 中国社区昆特平衡数据库</p></footer>
+
+<script>
+const TERMS = [{"slug": "narf", "cn_name": "削弱", "en_name": "Nerf", "category": "社区用语"}, {"slug": "buff", "cn_name": "增强", "en_name": "Buff;Boost", "category": "社区用语"}, {"slug": "nilfgaard", "cn_name": "尼弗迦德", "en_name": "Nilfgaard;NG", "category": "派系术语"}, {"slug": "balance-council", "cn_name": "平衡委员会", "en_name": "Balance Council (BC)", "category": "机制"}, {"slug": "bleed-out", "cn_name": "拔河", "en_name": "Bleed Out / Rounding", "category": "机制"}, {"slug": "meta", "cn_name": "环境", "en_name": "Meta", "category": "社区用语"}];
+let currentFilter = 'all';
+
+function setFilter(btn) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentFilter = btn.dataset.cat;
+    renderList();
+}
+
+function renderList() {
+    const query = (document.getElementById('searchInput').value || '').trim().toLowerCase();
+    let items = TERMS.filter(t => {
+        if (currentFilter !== 'all' && t.category !== currentFilter) return false;
+        if (!query) return true;
+        return (t.cn_name && t.cn_name.toLowerCase().includes(query)) ||
+               (t.en_name && t.en_name.toLowerCase().includes(query));
+    });
+    // 按中文拼音排序
+    items.sort((a,b) => (a.cn_name||'').localeCompare(b.cn_name||'', 'zh'));
+
+    const container = document.getElementById('termList');
+    if (!items.length) {
+        container.innerHTML = '<div class="empty-state">📖 没有找到匹配的术语</div>';
+        return;
+    }
+    container.innerHTML = items.map(t =>
+        `<a href="${t.slug}.html" class="term-card">
+            <span class="term-cat">${t.category}</span>
+            <div class="term-info">
+                <div class="term-cn-name">${t.cn_name}</div>
+                <div class="term-en-name">${t.en_name}</div>
+            </div>
+            <span style="color:var(--text-muted);flex-shrink:0;">›</span>
+        </a>`
+    ).join('');
+}
+
+// 初始化
+renderList();
+</script>
+
+</body>
+</html>
