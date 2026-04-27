@@ -1396,17 +1396,14 @@ function escapeRegExp(str) {
 // ==================== 启动 ====================
 init();
 
-// ESC 关闭模态框
+// ESC 关闭模态框（仅通过按钮/ESC关闭，防止误触丢失数据）
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
     closeEditModal();
     closeConfirm();
   }
 });
-// 点击遮罩关闭模态框
-document.getElementById('editModal').addEventListener('click', e => {
-  if (e.target.id === 'editModal') closeEditModal();
-});
+// 注意：已移除"点击遮罩关闭"功能——只能通过右上角 ✕ / 底部取消按钮 / ESC 关闭
 document.getElementById('confirmOverlay').addEventListener('click', e => {
   if (e.target.id === 'confirmOverlay') closeConfirm();
 });
